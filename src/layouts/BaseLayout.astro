@@ -1,0 +1,54 @@
+---
+import { siteConfig } from '@config/site';
+import '@styles/global.styl';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = siteConfig.name,
+  description = siteConfig.description,
+} = Astro.props;
+
+const pageTitle = title === siteConfig.name ? title : `${title} · ${siteConfig.name}`;
+---
+
+<!doctype html>
+<html lang={siteConfig.language} data-theme-preference="system">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#f6f7ff" />
+    <title>{pageTitle}</title>
+    <script is:inline>
+      (() => {
+        let preference = 'system';
+        try {
+          const saved = localStorage.getItem('denia-theme');
+          if (saved === 'light' || saved === 'dark' || saved === 'system') {
+            preference = saved;
+          }
+        } catch {
+          // 存储不可用时保留系统偏好。
+        }
+        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = preference === 'system'
+          ? (systemDark ? 'dark' : 'light')
+          : preference;
+
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.dataset.themePreference = preference;
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute('content', theme === 'dark' ? '#10101c' : '#f6f7ff');
+      })();
+    </script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

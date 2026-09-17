@@ -1,0 +1,389 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+    posts: CollectionEntry<'posts'>[];
+}
+
+const { posts } = Astro.props;
+const postMeta = posts.map((post) => ({
+    title: post.data.title,
+    publishedDate: post.data.publishedAt.toISOString().slice(0, 10),
+}));
+---
+
+<div class="calendar">
+    <!-- 头部 -->
+     <div class="calendar__header">
+        <button id="calendar-prev" class="calendar__prev" type="button" aria-label="上个月">
+            <Icon name="material-symbols:chevron-left-rounded" aria-hidden="true" />
+        </button>
+        <span class="calendar__title" id="calendar-title"></span>
+        <button id="calendar-next" class="calendar__next" type="button" aria-label="下个月">
+            <Icon name="material-symbols:chevron-right-rounded" aria-hidden="true" />
+        </button>
+    </div>
+
+    <!-- 星期 -->
+     <div class="calendar__week">
+        <span>日</span>
+        <span>一</span>
+        <span>二</span>
+        <span>三</span>
+        <span>四</span>
+        <span>五</span>
+        <span>六</span>
+     </div>
+
+     <!-- 日历主体 -->
+      <div id="calendar-body" class="calendar__body">
+        <!-- 日历格子将在这里生成 -->
+      </div>
+
+      <div id="calendar-heatmap" class="calendar__heatmap">
+        <!-- 日历热力图将在这里生成 -->
+      </div>
+
+      <div id="calendar-tooltip" class="calendar__tooltip" role="tooltip" hidden>
+        <!-- 提示信息将在这里生成 -->
+      </div>
+
+      <div id="calendar-posts" class="calendar__posts">
+        <!-- 当天的文章列表将在这里生成 -->
+      </div>
+
+
+</div>
+
+<script is:inline define:vars={{ postMeta }}>
+    (() => {
+        const posts = Array.isArray(postMeta) ? postMeta : [];
+
+        function parseDateOnly(value) {
+            const [yearPart, monthPart, dayPart] = value.split('-').map(Number);
+            return new Date(yearPart, monthPart - 1, dayPart);
+        }
+
+        const postByDays = new Map();
+        for (const post of posts) {
+            const date = parseDateOnly(post.publishedDate);
+            const key = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+            const list = postByDays.get(key) ?? [];
+            list.push(post);
+            postByDays.set(key, list);
+        }
+
+        const today = new Date();
+        let year = today.getFullYear();
+        let month = today.getMonth();
+        const titleEl = document.getElementById('calendar-title');
+        const bodyEl = document.getElementById('calendar-body');
+        const postsEl = document.getElementById('calendar-posts');
+        const heatmapEl = document.getElementById('calendar-heatmap');
+        const tooltipEl = document.getElementById('calendar-tooltip');
+
+        if (tooltipEl && tooltipEl.parentElement !== document.body) {
+            document.body.appendChild(tooltipEl);
+        }
+
+        function hideHeatmapTooltip() {
+            if (tooltipEl) tooltipEl.hidden = true;
+        }
+
+        function showHeatmapTooltip(cell) {
+            if (!tooltipEl) return;
+
+            const text = cell.getAttribute('data-tooltip');
+            if (!text) return;
+
+            const rect = cell.getBoundingClientRect();
+            tooltipEl.textContent = text;
+            tooltipEl.hidden = false;
+            tooltipEl.style.left = `${rect.left + rect.width / 2}px`;
+            tooltipEl.style.top = `${rect.top - 8}px`;
+        }
+
+        function renderHeatmap() {
+            if (!heatmapEl) return;
+
+            const counts = Array.from({ length: 12 }, () => [0, 0, 0, 0]);
+            for (const post of posts) {
+                const date = parseDateOnly(post.publishedDate);
+                if (date.getFullYear() !== year) continue;
+
+                const monthIndex = date.getMonth();
+                const weekIndex = Math.min(Math.floor((date.getDate() - 1) / 7), 3);
+                counts[monthIndex][weekIndex]++;
+            }
+
+            let html = '';
+            for (let weekIndex = 0; weekIndex < 4; weekIndex++) {
+                for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
+                    const count = counts[monthIndex][weekIndex];
+                    const level = Math.min(count, 4);
+                    const tooltip = `${monthIndex + 1}月第${weekIndex + 1}段，共${count}篇文章`;
+                    html += `<button type="button" class="calendar__heat" data-level="${level}" aria-label="${tooltip}" data-month="${monthIndex}" data-tooltip="${tooltip}"></button>`;
+                }
+            }
+            heatmapEl.innerHTML = html;
+
+            heatmapEl.querySelectorAll('.calendar__heat').forEach((cell) => {
+                cell.addEventListener('click', () => {
+                    const monthValue = cell.getAttribute('data-month');
+                    if (monthValue === null) return;
+
+                    hideHeatmapTooltip();
+                    month = Number(monthValue);
+                    render();
+                });
+                cell.addEventListener('mouseenter', () => showHeatmapTooltip(cell));
+                cell.addEventListener('mouseleave', hideHeatmapTooltip);
+                cell.addEventListener('focus', () => showHeatmapTooltip(cell));
+                cell.addEventListener('blur', hideHeatmapTooltip);
+            });
+        }
+
+        function renderPosts() {
+            if (!postsEl) return;
+
+            const monthPosts = posts
+                .filter((post) => {
+                    const date = parseDateOnly(post.publishedDate);
+                    return date.getFullYear() === year && date.getMonth() === month;
+                })
+                .sort((first, second) => second.publishedDate.localeCompare(first.publishedDate));
+
+            postsEl.replaceChildren();
+
+            if (monthPosts.length === 0) {
+                const empty = document.createElement('p');
+                empty.className = 'calendar__posts-empty';
+                empty.textContent = '本月暂无文章。';
+                postsEl.appendChild(empty);
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            for (const post of monthPosts) {
+                const date = parseDateOnly(post.publishedDate);
+                const item = document.createElement('div');
+                const title = document.createElement('span');
+                const published = document.createElement('span');
+
+                item.className = 'calendar__post';
+                title.className = 'calendar__post-title';
+                published.className = 'calendar__post-date';
+                title.textContent = post.title;
+                published.textContent = `${date.getMonth() + 1}-${date.getDate()}`;
+
+                item.append(title, published);
+                fragment.appendChild(item);
+            }
+            postsEl.appendChild(fragment);
+        }
+
+        function render() {
+            if (!titleEl || !bodyEl) return;
+
+            const startWeekday = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            titleEl.textContent = `${year}年${month + 1}月`;
+
+            let html = '';
+            for (let index = 0; index < startWeekday; index++) {
+                html += '<span class="calendar__cell calendar__cell--empty"></span>';
+            }
+            for (let day = 1; day <= daysInMonth; day++) {
+                const key = `${year}-${month + 1}-${day}`;
+                const count = postByDays.get(key)?.length ?? 0;
+                const hasPost = count > 0;
+                const isToday = year === today.getFullYear()
+                    && month === today.getMonth()
+                    && day === today.getDate();
+                html += `<span class="calendar__cell${hasPost ? ' has-post' : ''}${isToday ? ' is-today' : ''}">${day}${count > 1 ? `<span class="calendar__count">${count}</span>` : ''}</span>`;
+            }
+
+            bodyEl.innerHTML = html;
+            renderPosts();
+            renderHeatmap();
+        }
+
+        document.getElementById('calendar-prev')?.addEventListener('click', () => {
+            month--;
+            if (month < 0) {
+                month = 11;
+                year--;
+            }
+            render();
+        });
+
+        document.getElementById('calendar-next')?.addEventListener('click', () => {
+            month++;
+            if (month > 11) {
+                month = 0;
+                year++;
+            }
+            render();
+        });
+
+        render();
+    })();
+</script>
+
+<style lang="stylus">
+    .calendar__header
+        display flex
+        align-items center
+        justify-content space-between
+        margin-bottom .75rem
+
+    .calendar__prev,
+    .calendar__next
+        display grid
+        place-items center
+        width 2rem
+        height 2rem
+        border 1px solid var(--line-soft)
+        border-radius .6rem
+        color var(--text-secondary)
+        background var(--surface-muted)
+        cursor pointer
+        transition background .2s ease, color .2s ease
+        &:hover
+            background var(--accent-blue-strong)
+            border-color var(--accent-blue)
+
+    .calendar__title
+        font-size .95rem
+        font-weight 700
+
+    .calendar__week,
+    .calendar__body
+        display grid
+        grid-template-columns repeat(7, 1fr)
+        gap .25rem
+
+    .calendar__week span
+        text-align center
+        font-size .72rem
+        color var(--text-soft)
+
+    .calendar__body :global(.calendar__cell)
+        display grid
+        place-items center
+        aspect-ratio 1              // 正方形
+        border-radius .5rem
+        font-size .82rem
+        color var(--text-secondary)
+
+    .calendar__body :global(.calendar__cell.has-post)
+        position relative
+        color var(--text-primary)
+        font-weight 700
+        &::after
+            content ''
+            position absolute
+            bottom .16rem
+            width .28rem
+            height .28rem
+            border-radius 50%
+            background var(--accent-pink-strong)
+
+    .calendar__body :global(.calendar__cell.is-today)
+        color var(--text-primary)
+        font-weight 700
+        background var(--accent-pink)  
+
+    .calendar__body :global(.calendar__count)
+        position absolute
+        top 0
+        right .12rem
+        font-size .6rem
+        font-weight 700
+        color var(--accent-blue-strong)
+
+    
+
+    .calendar__posts
+        margin-top .85rem
+        padding-top .75rem
+        border-top 1px solid var(--line-soft)
+        display flex
+        flex-direction column
+        gap .3rem
+        max-height 12rem
+        overflow-y auto
+
+    .calendar__posts :global(.calendar__post)
+        display flex
+        align-items center
+        justify-content space-between
+        gap .6rem
+        padding .3rem .4rem
+        border-radius .5rem
+        font-size .8rem
+        color var(--text-secondary)
+
+        &:hover
+            background var(--surface-muted)
+
+    .calendar__posts :global(.calendar__post-title)
+        overflow hidden
+        white-space nowrap
+        text-overflow ellipsis
+
+    .calendar__posts :global(.calendar__post-date)
+        flex-shrink 0
+        font-size .72rem
+        color var(--text-soft)
+
+    .calendar__posts :global(.calendar__posts-empty)
+        margin 0
+        font-size .8rem
+        color var(--text-soft)
+
+    .calendar__heatmap
+        margin-top .85rem
+        display grid
+        grid-template-columns repeat(12, 1fr)
+        gap .18rem
+
+    .calendar__heatmap :global(.calendar__heat)
+        display block
+        padding 0
+        border 0
+        cursor pointer
+        aspect-ratio 1
+        border-radius .2rem
+        background var(--surface-muted)          // 0 篇：底色
+
+    .calendar__heatmap :global(.calendar__heat[data-level="1"])
+        background var(--accent-pink)
+        opacity .4
+    .calendar__heatmap :global(.calendar__heat[data-level="2"])
+        background var(--accent-pink)
+        opacity .6
+    .calendar__heatmap :global(.calendar__heat[data-level="3"])
+        background var(--accent-pink)
+        opacity .8
+    .calendar__heatmap :global(.calendar__heat[data-level="4"])
+        background var(--accent-pink)
+        opacity 1
+
+    .calendar__tooltip
+        position fixed
+        z-index 9999
+        padding .4rem .65rem
+        border 1px solid rgba(255, 255, 255, .12)
+        border-radius .5rem
+        color #fff
+        background rgba(24, 24, 38, .9)
+        box-shadow 0 .4rem 1.2rem rgba(0, 0, 0, .2)
+        font-size .72rem
+        line-height 1.3
+        white-space nowrap
+        pointer-events none
+        transform translate(-50%, -100%)
+
+</style>

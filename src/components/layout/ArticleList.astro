@@ -1,0 +1,50 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  posts: CollectionEntry<'posts'>[];
+}
+
+const { posts } = Astro.props;
+---
+
+<section class="article-section" id="articles" aria-labelledby="article-heading">
+  <div class="section-heading">
+    <div>
+      <p class="section-heading__eyebrow">Latest writing</p>
+      <h2 id="article-heading">最新文章</h2>
+    </div>
+    <span>{posts.length.toString().padStart(2, '0')}</span>
+  </div>
+
+  {
+    posts.length > 0 ? (
+      <div class="article-list">
+        {posts.map((post) => (
+          <article class="article-card">
+            <div class="article-card__meta">
+              <time datetime={post.data.publishedAt.toISOString()}>
+                {post.data.publishedAt.toLocaleDateString('zh-CN')}
+              </time>
+              <span>{post.data.category}</span>
+            </div>
+            <h3>{post.data.title}</h3>
+            <p>{post.data.description}</p>
+            <div class="article-card__tags">
+              {post.data.tags.map((tag) => <span>#{tag}</span>)}
+            </div>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <div class="empty-state">
+        <div class="empty-state__orb" aria-hidden="true">
+          <span>✦</span>
+        </div>
+        <p class="empty-state__eyebrow">A blank first page</p>
+        <h3>这里还很安静</h3>
+        <p>文章将从 Markdown 开始，一篇一篇长成这间小屋的模样。</p>
+      </div>
+    )
+  }
+</section>
