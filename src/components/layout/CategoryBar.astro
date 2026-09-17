@@ -1,0 +1,94 @@
+---
+import { Icon } from 'astro-icon/components';
+import { withBasePath } from '@utils/url';
+
+interface Props {
+  categoryCounts: Map<string, number>;
+}
+
+const { categoryCounts } = Astro.props;
+
+const categories = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1]);
+const homeHref = withBasePath('/');
+---
+
+<nav class="category-bar" aria-label="文章分类">
+    <a class="category-pill category-pill--home" href={homeHref} aria-label="首页" aria-current="page">
+      <Icon name="material-symbols:home-rounded" aria-hidden="true" />
+    </a>
+  <span class="category-bar__divider" aria-hidden="true"></span>
+
+  <div class="category-bar__scroll">
+    {
+      categories.map(([name, count]) => (
+        <span class="category-pill">
+          {name}
+          <span class="category-pill__count">{count}</span>
+        </span>
+      ))
+    }
+  </div>
+</nav>
+
+<style lang="stylus">
+  .category-bar
+    display flex
+    align-items center
+    gap .5rem
+    min-width 0
+    padding .75rem
+    border 1px solid var(--line-soft)
+    border-radius var(--radius-md)
+    background var(--surface)
+    box-shadow var(--shadow-soft)
+    backdrop-filter blur(18px)
+
+  .category-pill
+    display inline-flex
+    flex-shrink 0
+    align-items center
+    justify-content center
+    gap .4rem
+    min-height 2.25rem
+    padding .35rem .85rem
+    border-radius .75rem
+    color var(--text-secondary)
+    background var(--surface-muted)
+    font-size .86rem
+    font-weight 600
+    line-height 1
+    text-decoration none
+    transition color .2s ease, background .2s ease
+
+  a.category-pill:hover
+    color var(--accent-blue-strong)
+    background var(--surface-raised)
+
+  .category-pill--home
+    width 2.5rem
+    padding 0
+    color #fff
+    background linear-gradient(135deg, var(--accent-blue), var(--accent-pink))
+
+  .category-pill__count
+    color var(--text-soft)
+    font-size .68rem
+    font-weight 700
+
+  .category-bar__divider
+    width 1px
+    align-self stretch
+    flex-shrink 0
+    background var(--line-soft)
+
+  .category-bar__scroll
+    display flex
+    flex 1
+    min-width 0
+    gap .5rem
+    overflow-x auto
+    scrollbar-width none
+
+    &::-webkit-scrollbar
+      display none
+</style>

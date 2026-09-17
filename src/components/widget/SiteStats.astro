@@ -1,0 +1,241 @@
+---
+
+import type { CollectionEntry } from 'astro:content';
+import { Icon } from 'astro-icon/components';
+import { siteConfig } from '@config/site';
+
+interface Props {
+  posts: CollectionEntry<'posts'>[];
+  categoryCounts: Map<string, number>;
+  tagCounts: Map<string, number>;
+}
+
+const { posts, categoryCounts, tagCounts } = Astro.props;
+
+function countWords(markdown: string): number {
+  const text = markdown
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/`[^`]*`/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+    const chineseCharacters = text.match(/[\u4e00-\u9fff]/g)?.length ?? 0;
+    const englishWords = text.match(/\b\w+\b/g)?.length ?? 0;
+
+    return englishWords + chineseCharacters;
+}
+
+const totalWords = posts.reduce((total,post) => total + countWords(post.body ?? ''), 0);
+const millisecondsPerDay = 1000 * 60 * 60 * 24;
+
+function parseDateOnlyUtc(value: string): Date {
+  return new Date(`${value}T00:00:00Z`);
+}
+
+function utcStartOfDay(value: Date): Date {
+  return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()));
+}
+
+const lastActivity = posts.reduce<Date | null>((latest, post) => {
+  const updatedAt = post.data.updatedAt;
+  const date = updatedAt && updatedAt > post.data.publishedAt
+    ? updatedAt
+    : post.data.publishedAt;
+  return !latest || date > latest ? date : latest;
+}, null);
+
+const buildDay = utcStartOfDay(new Date());
+const siteStartDay = parseDateOnlyUtc(siteConfig.siteStartDate);
+const runningDaysAtBuild = Math.max(
+  1,
+  Math.floor((buildDay.getTime() - siteStartDay.getTime()) / millisecondsPerDay) + 1,
+);
+const lastActivityDate = lastActivity?.toISOString().slice(0, 10) ?? '';
+const activityDaysAtBuild = lastActivity
+  ? Math.max(
+      0,
+      Math.floor(
+        (buildDay.getTime() - utcStartOfDay(lastActivity).getTime()) / millisecondsPerDay,
+      ),
+    )
+  : null;
+
+const stats = [
+  {
+    icon: 'material-symbols:article-outline-rounded',
+    label: '文章',
+    value: posts.length.toString(),
+  },
+  {
+    icon: 'material-symbols:folder-outline-rounded',
+    label: '分类',
+    value: categoryCounts.size.toString(),
+  },
+  {
+    icon: 'material-symbols:label-outline-rounded',
+    label: '标签',
+    value: tagCounts.size.toString(),
+  },
+  {
+    icon: 'material-symbols:text-ad-outline-rounded',
+    label: '总字数',
+    value: totalWords.toLocaleString('zh-CN'),
+  },
+  {
+    icon: 'material-symbols:calendar-clock-outline-rounded',
+    label: '运行时长',
+    value: runningDaysAtBuild.toString(),
+    id: 'running-days',
+    suffix: '天',
+  },
+  {
+    icon: 'material-symbols:update-rounded',
+    label: '最后活动',
+    value: activityDaysAtBuild === null
+      ? '暂无'
+      : activityDaysAtBuild === 0
+        ? '今天'
+        : activityDaysAtBuild.toString(),
+    id: lastActivity ? 'last-activity' : undefined,
+    suffix: activityDaysAtBuild && activityDaysAtBuild > 0 ? '天前' : '',
+  },
+];
+---
+
+<section class="side-card stats-card" aria-labelledby="site-stats-title">
+  <h2 id="site-stats-title" class="stats-card__title">站点统计</h2>
+
+  <ul class="stats-list">
+    {
+      stats.map((stat) => (
+        <li>
+          <div class="stats-list__label">
+            <Icon name={stat.icon} aria-hidden="true" />
+            <span>{stat.label}</span>
+          </div>
+            <div class="stats-list__value">
+            <strong data-stat-id={stat.id}>{stat.value}</strong>
+            {
+                stat.suffix && (
+                <span class="stats-list__suffix">{stat.suffix}</span>
+                )
+            }
+            </div>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<script
+  is:inline
+  define:vars={{
+    siteStartDate: siteConfig.siteStartDate,
+    lastActivityDate,
+  }}
+>
+  const millisecondsPerDay = 1000 * 60 * 60 * 24;
+
+  function startOfDay(date) {
+    return new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+    );
+  }
+
+  function parseDateOnly(value) {
+    const [year, month, day] = value.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  const today = startOfDay(new Date());
+  const startDate = parseDateOnly(siteStartDate);
+
+  const runningDays = Math.max(
+    1,
+    Math.floor((today.getTime() - startDate.getTime()) / millisecondsPerDay) + 1,
+  );
+
+  document.querySelectorAll('[data-stat-id="running-days"]').forEach((runningElement) => {
+    runningElement.textContent = String(runningDays);
+  });
+
+  if (lastActivityDate) {
+    const activityDate = parseDateOnly(lastActivityDate);
+    const activityDays = Math.max(
+      0,
+      Math.floor(
+        (today.getTime() - activityDate.getTime()) / millisecondsPerDay,
+      ),
+    );
+
+    document.querySelectorAll('[data-stat-id="last-activity"]').forEach((activityElement) => {
+      const suffixElement = activityElement.nextElementSibling;
+
+      if (activityDays === 0) {
+        activityElement.textContent = '今天';
+        if (suffixElement) suffixElement.hidden = true;
+      } else {
+        activityElement.textContent = String(activityDays);
+        if (suffixElement) suffixElement.hidden = false;
+      }
+    });
+  }
+</script>
+
+<style lang="stylus">
+  .stats-card__title
+    display flex
+    align-items center
+    gap .75rem
+    margin .1rem 0 .75rem
+    font-size 1.125rem
+    font-weight 700
+
+    &::before
+      content ''
+      width .25rem
+      height 1rem
+      border-radius 999px
+      background var(--accent-blue)
+
+  .stats-list
+    display grid
+    gap .5rem
+    margin 0
+    padding 0
+    list-style none
+
+  .stats-list li
+    display flex
+    align-items center
+    justify-content space-between
+    min-height 2.25rem
+    padding .375rem .75rem
+    border-radius .7rem
+    color var(--text-secondary)
+
+    &:hover
+      background var(--surface-muted)
+
+  .stats-list__label
+    display flex
+    align-items center
+    gap .65rem
+
+    svg
+      width 1.25rem
+      height 1.25rem
+      color var(--accent-blue)
+
+  .stats-list strong
+    color var(--text-primary)
+    font-size 1rem
+    font-weight 700
+
+  .stats-list__suffix
+    margin-left .25rem
+    color var(--text-soft)
+    font-size .875rem
+</style>

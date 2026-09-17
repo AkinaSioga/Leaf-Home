@@ -1,0 +1,537 @@
+@import './tokens.styl'
+
+*
+  box-sizing border-box
+
+html
+  scroll-behavior smooth
+  background var(--page-bg)
+
+body
+  min-width 20rem
+  min-height 100vh
+  margin 0
+  color var(--text-primary)
+  background:
+    radial-gradient(circle at 10% 30%, rgba(102, 140, 255, .12), transparent 28rem),
+    radial-gradient(circle at 90% 65%, rgba(255, 131, 182, .12), transparent 25rem),
+    linear-gradient(145deg, var(--page-bg), var(--page-bg-accent))
+  font-family Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif
+  line-height 1.6
+  transition background .35s ease, color .35s ease
+
+a
+  color inherit
+
+button,
+a
+  -webkit-tap-highlight-color transparent
+
+button:focus-visible,
+a:focus-visible
+  outline 3px solid var(--focus-ring)
+  outline-offset 3px
+
+.hero
+  position relative
+  min-height clamp(25rem, 58vh, 38rem)
+  overflow hidden
+  isolation isolate
+  background:
+    linear-gradient(180deg, rgba(12, 22, 58, .16), rgba(20, 16, 48, .34)),
+    var(--hero-image) center 20% / cover no-repeat
+  color #fff
+
+  &::after
+    content ''
+    position absolute
+    inset auto 0 0
+    height 8rem
+    z-index -1
+    background linear-gradient(to bottom, transparent, var(--page-bg))
+
+.hero__glow
+  position absolute
+  width 22rem
+  aspect-ratio 1
+  z-index -2
+  border-radius 50%
+  filter blur(2px)
+  opacity .75
+  animation float-orb 8s ease-in-out infinite alternate
+
+.hero__glow--blue
+  top -9rem
+  left -5rem
+  background radial-gradient(circle, rgba(141, 191, 255, .82), transparent 68%)
+
+.hero__glow--pink
+  right -6rem
+  bottom -8rem
+  background radial-gradient(circle, rgba(255, 155, 203, .76), transparent 68%)
+  animation-delay -3s
+
+.site-nav
+  position: sticky
+  top 0
+  z-index 100
+  display grid
+  grid-template-columns auto 1fr auto
+  align-items center
+  gap 1rem
+  width 92vw
+  max-width var(--content-width)
+  min-height 4.5rem
+  margin 0 auto
+  padding .4rem 1.25rem
+  border 1px solid transparent
+  border-radius 0 0 .75rem .75rem
+  background var(--surface)
+  transition background-color .36s cubic-bezier(.22, 1, .36, 1), border-color .36s, box-shadow .36s, backdrop-filter .36s
+  box-shadow 0 16px 50px rgba(21, 31, 75, .18)
+  backdrop-filter blur(18px)
+  animation reveal-down .7s cubic-bezier(.2, .8, .2, 1) both
+
+  > :last-child
+    justify-self end
+
+.site-nav__brand
+  min-height 3.25rem
+  padding .3rem 1.25rem
+  border-radius .75rem
+  display inline-flex
+  align-items center
+  gap .7rem
+  width fit-content
+  color var(--text-primary)
+  font-weight 760
+  text-decoration none
+
+.site-nav__logo
+  width 2.55rem
+  height 2.55rem
+  border-radius .6rem
+  object-fit cover
+
+.site-nav__title
+  font-size 1.2rem
+  font-weight 700
+
+.site-nav__links
+  display flex
+  justify-content center
+  align-items center
+  gap .35rem
+
+  a
+    padding .55rem .85rem
+    border-radius .35rem
+    color var(--text-secondary)
+    font-size 1.2rem
+    font-weight 600
+    text-decoration none
+    transition background .2s ease, color .2s ease, transform .2s ease
+
+    &:hover
+      color var(--accent-blue-strong)
+      background var(--surface-muted)
+      transform translateY(-1px)
+
+.site-nav__icon
+  width 1.3rem
+  height 1.3rem
+  flex-shrink 0
+  vertical-align middle
+
+.hero__content
+  width 100%
+  max-width 48rem
+  margin clamp(6.5rem, 15vh, 10rem) auto 0
+  text-align center
+  animation reveal-up .9s .12s cubic-bezier(.2, .8, .2, 1) both
+
+  h1
+    margin 0
+    color #fff
+    font-family "Noto Sans SC", "Microsoft YaHei", sans-serif
+    font-size clamp(2rem, 5vw, 3.25rem)
+    font-weight 760
+    line-height 1.2
+    letter-spacing .06em
+    text-shadow 0 3px 12px rgba(24, 29, 72, .48)
+
+.hero__subtitle
+  margin .65rem 0 0
+  color rgba(255, 255, 255, .84)
+  font-family Inter, ui-sans-serif, system-ui, sans-serif
+  font-size clamp(.82rem, 1.8vw, 1rem)
+  font-weight 450
+  letter-spacing .02em
+  text-shadow 0 2px 8px rgba(24, 29, 72, .42)
+
+.home-shell
+  display grid
+  grid-template-columns var(--sidebar-width) minmax(0, 1fr) var(--sidebar-width)
+  align-items start
+  gap 1rem
+  width 92vw
+  max-width var(--content-width)
+  margin -3.5rem auto 0
+  position relative
+  z-index 2
+
+.home-shell:not(.home-shell--single)
+  grid-template-areas 'sidebar-left content sidebar-right'
+
+.content-column
+  display grid
+  grid-area content
+  min-width 0
+  gap 1rem
+
+.home-shell > .sidebar:not(.sidebar--right)
+  grid-area sidebar-left
+
+.home-shell > .sidebar--right
+  grid-area sidebar-right
+
+.home-shell--single
+  grid-template-columns minmax(0, 1fr)
+  max-width 72rem
+
+.prose
+  max-width 72ch
+  padding-top 1.25rem
+  color var(--text-secondary)
+
+  p
+    margin .75rem 0
+    line-height 1.7
+
+.sidebar
+  display grid
+  gap 1rem
+
+.side-card,
+.article-section
+  border 1px solid var(--line-soft)
+  background var(--surface-raised)
+  box-shadow 0 2px 8px rgba(35, 36, 58, .06)
+  backdrop-filter none
+
+.side-card
+  padding 1rem
+  border-radius 1rem
+  animation reveal-up .65s cubic-bezier(.2, .8, .2, 1) both
+
+  &:nth-child(2)
+    animation-delay .08s
+
+  &:nth-child(3)
+    animation-delay .16s
+
+  &:nth-child(4)
+    animation-delay .24s
+
+  h2
+    margin .1rem 0 .4rem
+    font-size 1.08rem
+
+  p
+    margin .35rem 0 0
+    color var(--text-secondary)
+    font-size .88rem
+
+.side-card__eyebrow,
+.section-heading__eyebrow,
+.empty-state__eyebrow
+  color var(--accent-blue-strong) !important
+  font-size .68rem !important
+  font-weight 800
+  letter-spacing .16em
+  text-transform uppercase
+
+.side-card__heading
+  display flex
+  align-items flex-start
+  justify-content space-between
+  gap 1rem
+
+.profile-card
+  padding-top 1.5rem
+
+.profile-card__avatar
+  display block
+  width 100%
+  height auto
+  aspect-ratio 1
+  margin 0 0 .75rem
+  object-fit cover
+  border 0
+  border-radius .75rem
+  box-shadow none
+
+.profile-card__status
+  display flex
+  align-items center
+  gap .45rem
+  margin-top 1rem
+  color var(--text-soft)
+  font-size .74rem
+
+  span
+    width .48rem
+    aspect-ratio 1
+    border-radius 50%
+    background #66c99a
+    box-shadow 0 0 0 .25rem rgba(102, 201, 154, .12)
+
+.music-card__disc
+  display grid
+  width 2.5rem
+  aspect-ratio 1
+  place-items center
+  border-radius 50%
+  color #fff
+  background linear-gradient(135deg, #25283f, var(--accent-pink))
+  box-shadow 0 8px 18px rgba(235, 91, 154, .18)
+
+.music-card button
+  width 100%
+  min-height 2.35rem
+  margin-top 1rem
+  border 0
+  border-radius .85rem
+  color var(--text-soft)
+  background var(--surface-muted)
+  font inherit
+  font-size .8rem
+
+.side-card__count
+  display grid
+  min-width 2rem
+  min-height 2rem
+  place-items center
+  border-radius .75rem
+  color var(--accent-blue-strong)
+  background var(--surface-muted)
+  font-size .8rem
+  font-weight 800
+
+.links-card__placeholder
+  display block
+  margin-top .9rem
+  padding .7rem
+  border 1px dashed var(--line-soft)
+  border-radius .8rem
+  color var(--text-soft)
+  font-size .72rem
+  letter-spacing .08em
+  text-align center
+  text-transform uppercase
+
+.article-section
+  min-height 38rem
+  padding clamp(1.25rem, 3vw, 2rem)
+  border-radius var(--radius-lg)
+  box-shadow var(--shadow-card)
+  animation reveal-up .75s .08s cubic-bezier(.2, .8, .2, 1) both
+
+.section-heading
+  display flex
+  align-items flex-end
+  justify-content space-between
+  gap 1rem
+  padding-bottom 1.2rem
+  border-bottom 1px solid var(--line-soft)
+
+  h2
+    margin .15rem 0 0
+    font-family Georgia, "Times New Roman", serif
+    font-size clamp(1.8rem, 4vw, 2.4rem)
+    font-weight 600
+
+  > span
+    color var(--text-soft)
+    font-family Georgia, serif
+    font-size 1.2rem
+
+.article-list
+  display grid
+  gap 1rem
+  padding-top 1.25rem
+
+.article-card
+  padding 1.25rem
+  border 1px solid var(--line-soft)
+  border-radius var(--radius-md)
+  background var(--surface-raised)
+
+.article-card__meta,
+.article-card__tags
+  display flex
+  flex-wrap wrap
+  gap .75rem
+  color var(--text-soft)
+  font-size .76rem
+
+.article-card h3
+  margin .55rem 0 .35rem
+  font-size 1.25rem
+
+.article-card p
+  color var(--text-secondary)
+
+.empty-state
+  display grid
+  min-height 29rem
+  place-content center
+  justify-items center
+  padding 2rem
+  text-align center
+
+  h3
+    margin .2rem 0 .45rem
+    font-family Georgia, "Noto Serif SC", serif
+    font-size clamp(1.65rem, 4vw, 2.2rem)
+    font-weight 600
+
+  > p:last-child
+    max-width 28rem
+    margin .25rem 0
+    color var(--text-secondary)
+
+.empty-state__orb
+  display grid
+  width 6rem
+  aspect-ratio 1
+  margin-bottom 1.5rem
+  place-items center
+  border 1px solid var(--line-soft)
+  border-radius 2.2rem
+  color #fff
+  background linear-gradient(135deg, var(--accent-blue), var(--accent-pink))
+  box-shadow 0 20px 50px rgba(103, 110, 203, .22)
+  font-size 2rem
+  transform rotate(-7deg)
+  animation gentle-tilt 4s ease-in-out infinite alternate
+
+.site-footer
+  display flex
+  justify-content space-between
+  gap 1rem
+  width calc(100% - 2rem)
+  max-width var(--content-width)
+  margin 2rem auto 0
+  padding 1.6rem 0 2.5rem
+  border-top 1px solid var(--line-soft)
+  color var(--text-soft)
+  font-size .78rem
+
+  p
+    margin 0
+
+@keyframes reveal-down
+  from
+    opacity 0
+    transform translateY(-1rem)
+  to
+    opacity 1
+    transform translateY(0)
+
+@keyframes reveal-up
+  from
+    opacity 0
+    transform translateY(1.5rem)
+  to
+    opacity 1
+    transform translateY(0)
+
+@keyframes float-orb
+  from
+    transform translate3d(-1rem, 0, 0) scale(.94)
+  to
+    transform translate3d(1rem, 1.2rem, 0) scale(1.06)
+
+@keyframes gentle-tilt
+  from
+    transform rotate(-7deg) translateY(0)
+  to
+    transform rotate(4deg) translateY(-.5rem)
+
+@media (max-width: 80rem)
+  :root
+    --sidebar-width 17.5rem
+
+  .site-nav
+    grid-template-columns 1fr auto
+
+  .site-nav__links
+    grid-column 1 / -1
+    grid-row 2
+    justify-content center
+    order 3
+
+  .home-shell
+    grid-template-columns 1fr
+    width calc(100% - 1.2rem)
+    max-width 44rem
+
+  .home-shell:not(.home-shell--single)
+    grid-template-areas 'content' 'sidebar-left' 'sidebar-right'
+
+  .sidebar
+    grid-template-columns repeat(2, minmax(0, 1fr))
+
+  .profile-card
+    grid-row span 2
+
+@media (max-width: 36rem)
+  .hero
+    min-height 34rem
+    padding-inline .65rem
+
+  .site-nav
+    gap .7rem
+    border-radius 1.15rem
+
+  .site-nav__brand
+    font-size .9rem
+
+  .site-nav__links
+    overflow-x auto
+    justify-content flex-start
+    padding-bottom .1rem
+
+  .hero__content
+    margin-top 5rem
+
+  .sidebar
+    grid-template-columns 1fr
+
+  .profile-card
+    grid-row auto
+
+  .article-section
+    min-height 32rem
+    border-radius 1.35rem
+
+  .empty-state
+    min-height 24rem
+    padding 1rem
+
+  .site-footer
+    flex-direction column
+    text-align center
+
+@media (prefers-reduced-motion: reduce)
+  html
+    scroll-behavior auto
+
+  *,
+  *::before,
+  *::after
+    animation-duration .01ms !important
+    animation-iteration-count 1 !important
+    scroll-behavior auto !important
+    transition-duration .01ms !important

@@ -1,0 +1,30 @@
+---
+import Navbar from '@components/layout/Navbar.astro';
+import { siteConfig } from '@config/site';
+import BaseLayout from '@layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="关于">
+  <Navbar />
+
+  <main class="home-shell home-shell--single">
+    <section class="article-section" aria-labelledby="about-heading">
+      <div class="section-heading">
+        <div>
+          <p class="section-heading__eyebrow">About</p>
+          <h2 id="about-heading">关于</h2>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>你好，我是 {siteConfig.author}。{siteConfig.description}</p>
+        <p>这一页还在慢慢写。</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© {new Date().getFullYear()} {siteConfig.author}</p>
+    <p>Built quietly with Astro.</p>
+  </footer>
+</BaseLayout>

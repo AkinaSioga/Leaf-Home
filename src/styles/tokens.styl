@@ -1,0 +1,61 @@
+:root
+  color-scheme light
+  --page-bg #f6f7ff
+  --page-bg-accent #fff4fa
+  --surface rgba(255, 255, 255, .78)
+  --surface-raised rgba(255, 255, 255, .94)
+  --surface-muted rgba(238, 241, 255, .82)
+  --text-primary #23243a
+  --text-secondary #686b83
+  --text-soft #8e91a8
+  --line-soft rgba(83, 92, 143, .14)
+  --accent-blue #668cff
+  --accent-blue-strong #4267e8
+  --accent-pink #ff83b6
+  --accent-pink-strong #eb5b9a
+  --focus-ring rgba(102, 140, 255, .34)
+  --shadow-soft 0 12px 35px rgba(69, 78, 127, .1)
+  --shadow-card 0 18px 55px rgba(69, 78, 127, .14)
+  --radius-lg 1.75rem
+  --radius-md 1.25rem
+  --content-width 120rem
+  --sidebar-width 22rem
+
+:root[data-theme='dark']
+  color-scheme dark
+  --page-bg #10101c
+  --page-bg-accent #181426
+  --surface rgba(27, 28, 47, .82)
+  --surface-raised rgba(34, 35, 58, .94)
+  --surface-muted rgba(42, 43, 68, .78)
+  --text-primary #f4f3ff
+  --text-secondary #bebed2
+  --text-soft #8d8da7
+  --line-soft rgba(208, 210, 255, .13)
+  --accent-blue #82a1ff
+  --accent-blue-strong #a8baff
+  --accent-pink #ff92c1
+  --accent-pink-strong #ffabd0
+  --focus-ring rgba(130, 161, 255, .4)
+  --shadow-soft 0 12px 35px rgba(0, 0, 0, .2)
+  --shadow-card 0 18px 55px rgba(0, 0, 0, .3)
+
+@media (prefers-color-scheme: dark)
+  :root:not([data-theme])
+    color-scheme dark
+    --page-bg #10101c
+    --page-bg-accent #181426
+    --surface rgba(27, 28, 47, .82)
+    --surface-raised rgba(34, 35, 58, .94)
+    --surface-muted rgba(42, 43, 68, .78)
+    --text-primary #f4f3ff
+    --text-secondary #bebed2
+    --text-soft #8d8da7
+    --line-soft rgba(208, 210, 255, .13)
+    --accent-blue #82a1ff
+    --accent-blue-strong #a8baff
+    --accent-pink #ff92c1
+    --accent-pink-strong #ffabd0
+    --focus-ring rgba(130, 161, 255, .4)
+    --shadow-soft 0 12px 35px rgba(0, 0, 0, .2)
+    --shadow-card 0 18px 55px rgba(0, 0, 0, .3)

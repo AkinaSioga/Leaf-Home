@@ -1,0 +1,52 @@
+---
+import { Image } from 'astro:assets';
+import heroImage from '@assets/hero-banner.webp';
+import logoImg from '@assets/logo.png';
+import { Icon } from 'astro-icon/components';
+import { navBarConfig } from '@config/navBarConfig';
+import { siteConfig } from '@config/site';
+import LightDarkSwitch from '@components/controls/LightDarkSwitch.svelte';
+import { withBasePath } from '@utils/url';
+
+const heroBackground = `url("${heroImage.src}")`;
+const homeHref = withBasePath('/');
+---
+
+<header class="hero" id="top" style={`--hero-image: ${heroBackground}`}>
+  <div class="hero__glow hero__glow--blue" aria-hidden="true"></div>
+  <div class="hero__glow hero__glow--pink" aria-hidden="true"></div>
+
+  <nav class="site-nav" aria-label="主导航">
+    <a class="site-nav__brand" href={homeHref} aria-label={siteConfig.name}>
+      <Image
+        class="site-nav__logo"
+        src={logoImg}
+        alt=""
+        width={41}
+        height={41}
+        densities={[1, 2]}
+        format="webp"
+        loading="eager"
+      />
+      <span class="site-nav__title">{siteConfig.name}</span>
+    </a>
+
+    <div class="site-nav__links">
+      {
+        navBarConfig.links.map((link) => (
+          <a href={withBasePath(link.href)} aria-label={link.name}>
+            {link.icon && <Icon class="site-nav__icon" name={link.icon} aria-hidden="true" />}
+            <span>{link.name}</span>
+          </a>
+        ))
+      }
+    </div>
+
+    <LightDarkSwitch client:load />
+  </nav>
+
+  <div class="hero__content">
+    <h1>{siteConfig.heroTitle}</h1>
+    <p class="hero__subtitle">{siteConfig.heroSubtitle}</p>
+  </div>
+</header>
