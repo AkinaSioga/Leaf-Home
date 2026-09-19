@@ -8,6 +8,7 @@ import { siteConfig } from '@config/site';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import CategoryBar from '@components/layout/CategoryBar.astro';
 import { buildTaxonomyCounts } from '@utils/postStats';
+import ShortNotes from '@components/widget/ShortNotes.astro';
 
 const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
@@ -20,6 +21,7 @@ const { categoryCounts, tagCounts } = buildTaxonomyCounts(posts);
 
   <main class="home-shell">
     <div class="content-column">
+      <ShortNotes />
       <CategoryBar categoryCounts={categoryCounts} />
       <ArticleList posts={posts} />
     </div>

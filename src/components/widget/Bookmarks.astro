@@ -1,0 +1,72 @@
+---
+import { personalConfig } from '@config/personal';
+
+const bookmarks = personalConfig.bookmarks.map((bookmark) => {
+  const url = new URL(bookmark.url);
+  if (!['https:', 'http:'].includes(url.protocol)) {
+    throw new Error(`小书签只支持 HTTP(S) 地址：${bookmark.title}`);
+  }
+  return { ...bookmark, href: url.href, domain: url.hostname };
+});
+---
+
+<section class="side-card bookmarks-card" id="links" aria-labelledby="bookmarks-title">
+  <p class="side-card__eyebrow">Worth keeping</p>
+  <h2 id="bookmarks-title">小书签</h2>
+  {bookmarks.length > 0 ? (
+    <ul>
+      {bookmarks.map((bookmark) => (
+        <li>
+          <a href={bookmark.href}>
+            <span class="bookmark-title">{bookmark.title}<span aria-hidden="true"> ↗</span></span>
+            <span class="bookmark-description">{bookmark.description}</span>
+            <span class="bookmark-domain">{bookmark.domain}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p class="bookmark-empty">还没有收藏。遇到值得留下的网站，就放在这里。</p>
+  )}
+</section>
+
+<style lang="stylus">
+  ul
+    display grid
+    gap .65rem
+    margin 1rem 0 0
+    padding 0
+    list-style none
+
+  a
+    display grid
+    gap .3rem
+    padding .8rem
+    border 1px solid var(--line-soft)
+    border-radius .75rem
+    text-decoration none
+    overflow-wrap anywhere
+    transition background .2s ease
+
+    &:hover
+      background var(--surface-muted)
+
+  .bookmark-title
+    color var(--accent-blue-strong)
+    font-size .9rem
+    font-weight 650
+
+  .bookmark-description
+    color var(--text-secondary)
+    font-size .8rem
+
+  .bookmark-domain
+    color var(--text-secondary)
+    font-size .7rem
+
+  .bookmarks-card .bookmark-empty
+    margin-top .8rem
+    padding .8rem
+    border 1px dashed var(--line-soft)
+    border-radius .75rem
+</style>

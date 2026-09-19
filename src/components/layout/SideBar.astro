@@ -1,6 +1,8 @@
 ---
 import { siteConfig } from '@config/site';
 import avatar from '@assets/avatar.jpg';
+import Now from '@components/widget/Now.astro';
+import Bookmarks from '@components/widget/Bookmarks.astro';
 ---
 
 <aside class="sidebar" aria-label="博客侧栏">
@@ -21,22 +23,6 @@ import avatar from '@assets/avatar.jpg';
     </div>
   </section>
 
-  <section class="side-card music-card">
-    <div class="side-card__heading">
-      <div>
-        <p class="side-card__eyebrow">Now playing</p>
-        <h2>音乐</h2>
-      </div>
-      <span class="music-card__disc" aria-hidden="true">♪</span>
-    </div>
-    <p>QQ 音乐外链播放器将在确认曲目后接入。</p>
-    <button type="button" disabled>等待歌单</button>
-  </section>
-
-  <section class="side-card links-card" id="links">
-    <p class="side-card__eyebrow">Find me</p>
-    <h2>链接</h2>
-    <p>个人外部链接尚未配置。</p>
-    <span class="links-card__placeholder">Links coming soon</span>
-  </section>
+  <Now />
+  <Bookmarks />
 </aside>
