@@ -1,0 +1,63 @@
+---
+import { personalConfig } from '@config/personal';
+
+const { now } = personalConfig;
+const labels = { ongoing: '进行中', done: '已完成', planned: '想做' };
+---
+
+<section class="side-card now-card" aria-labelledby="now-title">
+  <p class="side-card__eyebrow">These days</p>
+  <h2 id="now-title">最近在折腾</h2>
+  {now.items.length > 0 ? (
+    <ul>
+      {now.items.map((item) => (
+        <li>
+          <span class:list={['status', `status--${item.status}`]}>{labels[item.status]}</span>
+          <span>{item.text}</span>
+        </li>
+      ))}
+    </ul>
+  ) : <p>暂时放空一下，新的小计划慢慢来。</p>}
+  {now.items.length > 0 && now.updatedAt && (
+    <p class="updated">更新于 <time datetime={now.updatedAt}>{now.updatedAt.replaceAll('-', '.')}</time></p>
+  )}
+</section>
+
+<style lang="stylus">
+  ul
+    display grid
+    gap .85rem
+    margin 1rem 0
+    padding 0
+    list-style none
+
+  li
+    display grid
+    grid-template-columns auto minmax(0, 1fr)
+    align-items start
+    gap .65rem
+    color var(--text-secondary)
+    font-size .875rem
+    overflow-wrap anywhere
+
+  .status
+    padding .15rem .45rem
+    border-radius .4rem
+    background var(--surface-muted)
+    font-size .7rem
+    white-space nowrap
+
+  .status--ongoing
+    color var(--accent-blue-strong)
+
+  .status--done
+    color var(--text-secondary)
+
+  .status--planned
+    color var(--accent-pink-strong)
+
+  .now-card .updated
+    padding-top .7rem
+    border-top 1px solid var(--line-soft)
+    font-size .75rem
+</style>

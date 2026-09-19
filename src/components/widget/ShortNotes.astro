@@ -1,0 +1,59 @@
+---
+import { personalConfig } from '@config/personal';
+
+const notes = [...personalConfig.notes]
+  .sort((a, b) => b.date.localeCompare(a.date))
+  .slice(0, 3);
+---
+
+<section class="side-card notes-card" aria-labelledby="notes-title">
+  <div class="side-card__heading">
+    <div>
+      <p class="side-card__eyebrow">Little moments</p>
+      <h2 id="notes-title">碎碎念</h2>
+    </div>
+    <span class="notes-mark" aria-hidden="true">✦</span>
+  </div>
+  {notes.length > 0 ? (
+    <ol>
+      {notes.map((note) => (
+        <li>
+          <time datetime={note.date}>{note.date.replaceAll('-', '.')}</time>
+          <p>{note.text}</p>
+        </li>
+      ))}
+    </ol>
+  ) : <p>留一点地方，给日常的小发现。</p>}
+</section>
+
+<style lang="stylus">
+  .notes-card
+    padding 1.25rem
+    min-width 0
+
+  .notes-mark
+    color var(--accent-pink-strong)
+    font-size 1.4rem
+
+  ol
+    display grid
+    gap 1rem
+    margin 1rem 0 0
+    padding 0
+    list-style none
+
+  li
+    padding-left 1rem
+    border-left 2px solid var(--accent-pink)
+    overflow-wrap anywhere
+
+  time
+    color var(--text-secondary)
+    font-size .75rem
+    font-variant-numeric tabular-nums
+
+  .notes-card li p
+    margin .25rem 0 0
+    white-space pre-line
+    line-height 1.8
+</style>
