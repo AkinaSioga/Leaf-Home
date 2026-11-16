@@ -1,0 +1,29 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import WritingLayout from '@layouts/WritingLayout.astro';
+import { getWriting, seriesUrl, chapterUrl, dated } from '@utils/content';
+import { withBasePath } from '@utils/url';
+export async function getStaticPaths() {
+  const { works, chaptersFor } = await getWriting();
+  return works.flatMap(work => {
+    const chapters = chaptersFor(work.id);
+    return chapters.map((chapter, index) => ({ params: { id: chapter.id }, props: { work, chapter, previous: chapters[index - 1], next: chapters[index + 1] } }));
+  });
+}
+interface Props { work: CollectionEntry<'series'>; chapter: CollectionEntry<'chapters'>; previous?: CollectionEntry<'chapters'>; next?: CollectionEntry<'chapters'>; }
+const { work, chapter, previous, next } = Astro.props;
+const { Content } = await render(chapter);
+---
+<WritingLayout title={chapter.data.title + ' · ' + work.data.title} description={work.data.description}>
+  <nav class="breadcrumbs" aria-label="位置"><a href={withBasePath('/writing/')}>创作</a><span>/</span><a href={seriesUrl(work.id)}>{work.data.title}</a></nav>
+  <article class="reading-page">
+    <header class="reading-heading"><p class="writing-kicker">{work.data.title} · 第 {chapter.data.order} 章</p><h1>{chapter.data.title}</h1><p class="reading-meta"><time datetime={chapter.data.publishedAt.toISOString()}>{dated(chapter.data.publishedAt)}</time>{chapter.data.updatedAt && ` · 更新于 ${dated(chapter.data.updatedAt)}`}{chapter.data.draft && ' · 草稿'}</p></header>
+    <div class="reading-body markdown-body"><Content /></div>
+    <div class="reading-end"><span aria-hidden="true">✦</span><p>{next ? '本章完' : work.data.status === 'completed' ? '全书完' : '未完待续'}</p></div>
+    <nav class="reader-nav reader-nav--chapters" aria-label="章节导航">
+      {previous ? <a rel="prev" href={chapterUrl(previous.id)}>← 上一章：{previous.data.title}</a> : <span>已是第一章</span>}
+      <a href={seriesUrl(work.id)}>章节目录</a>
+      {next ? <a rel="next" href={chapterUrl(next.id)}>下一章：{next.data.title} →</a> : <span>{work.data.status === 'completed' ? '已读至终章' : '等待下一章'}</span>}
+    </nav>
+  </article>
+</WritingLayout>

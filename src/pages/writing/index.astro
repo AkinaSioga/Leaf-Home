@@ -1,0 +1,20 @@
+---
+import WritingLayout from '@layouts/WritingLayout.astro';
+import StoryFeature from '@components/writing/StoryFeature.astro';
+import { getWriting, seriesUrl, essayUrl, dated, statusLabel } from '@utils/content';
+const { works, essays, chaptersFor } = await getWriting();
+const [featured, ...others] = works;
+---
+<WritingLayout title="创作" description="独立于博客文章的故事与散文，在这里慢慢读。">
+  <header class="writing-masthead"><h1>创作</h1><nav class="writing-switch" aria-label="创作分类"><a href="#serials">连载</a><span aria-hidden="true">/</span><a href="#essays">散文</a></nav></header>
+  <StoryFeature work={featured} chapters={featured ? chaptersFor(featured.id) : []} />
+  {others.length > 0 && <section class="writing-section" aria-labelledby="more-stories">
+    <div class="writing-section__heading"><h2 id="more-stories">更多故事</h2></div>
+    {others.map(work => <a class="essay-row" href={seriesUrl(work.id)}><h3>{work.data.title}</h3><p>{work.data.description}</p><span class="essay-row__meta">{statusLabel[work.data.status]} · {chaptersFor(work.id).length} 章{work.data.draft && ' · 草稿'}</span><span class="essay-row__arrow" aria-hidden="true">→</span></a>)}
+  </section>}
+  <section id="essays" class="writing-section" aria-labelledby="essays-title">
+    <div class="writing-section__heading"><h2 id="essays-title">散文</h2><span>一些独立成篇的心事</span></div>
+    {essays.map(essay => <a class="essay-row" href={essayUrl(essay.id)}><h3>{essay.data.title}</h3><p>{essay.data.description}</p><span class="essay-row__meta">{dated(essay.data.publishedAt)}{essay.data.draft && ' · 草稿'}</span><span class="essay-row__arrow" aria-hidden="true">→</span></a>)}
+    {!essays.length && <p class="writing-empty">窗边留了一页空白，等下一篇文字。</p>}
+  </section>
+</WritingLayout>

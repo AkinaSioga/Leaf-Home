@@ -2,19 +2,24 @@
 import { Image } from 'astro:assets';
 import heroImage from '@assets/hero-banner.webp';
 import logoImg from '@assets/logo.png';
-import { Icon } from 'astro-icon/components';
 import { navBarConfig } from '@config/navBarConfig';
 import { siteConfig } from '@config/site';
 import LightDarkSwitch from '@components/controls/LightDarkSwitch.svelte';
 import { withBasePath } from '@utils/url';
+import { personalConfig } from '@config/personal';
+
+interface Props { compact?: boolean; }
+const { compact = false } = Astro.props;
+const links = personalConfig.bookmarks.length
+  ? [...navBarConfig.links, { name: '链接', href: '/#links' }]
+  : navBarConfig.links;
+const currentPath = Astro.url.pathname.replace(/\/$/, '');
 
 const heroBackground = `url("${heroImage.src}")`;
 const homeHref = withBasePath('/');
 ---
 
-<header class="hero" id="top" style={`--hero-image: ${heroBackground}`}>
-  <div class="hero__glow hero__glow--blue" aria-hidden="true"></div>
-  <div class="hero__glow hero__glow--pink" aria-hidden="true"></div>
+<header class:list={['hero', { 'hero--compact': compact }]} id="top" style={`--hero-image: ${heroBackground}`}>
 
   <nav class="site-nav" aria-label="主导航">
     <a class="site-nav__brand" href={homeHref} aria-label={siteConfig.name}>
@@ -33,20 +38,20 @@ const homeHref = withBasePath('/');
 
     <div class="site-nav__links">
       {
-        navBarConfig.links.map((link) => (
-          <a href={withBasePath(link.href)} aria-label={link.name}>
-            {link.icon && <Icon class="site-nav__icon" name={link.icon} aria-hidden="true" />}
+        links.map((link) => (
+          <a href={withBasePath(link.href)} aria-label={link.name}
+            aria-current={!link.href.includes('#') && (link.href === '/' ? currentPath === homeHref.replace(/\/$/, '') : currentPath.startsWith(withBasePath(link.href).replace(/\/$/, ''))) ? 'page' : undefined}>
             <span>{link.name}</span>
           </a>
         ))
       }
     </div>
 
-    <LightDarkSwitch client:load />
+    <div class="site-nav__theme"><LightDarkSwitch client:load /></div>
   </nav>
 
-  <div class="hero__content">
+  {!compact && <div class="hero__content">
     <h1>{siteConfig.heroTitle}</h1>
     <p class="hero__subtitle">{siteConfig.heroSubtitle}</p>
-  </div>
+  </div>}
 </header>

@@ -1,0 +1,24 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import platform from '@assets/writing-night-platform.webp';
+import { seriesUrl, chapterUrl, statusLabel } from '@utils/content';
+interface Props { work?: CollectionEntry<'series'>; chapters?: CollectionEntry<'chapters'>[]; detail?: boolean; }
+const { work, chapters = [], detail = false } = Astro.props;
+const Heading = detail ? 'h1' : 'h2';
+const first = chapters[0];
+const latest = chapters.at(-1);
+---
+<section class:list={['story-feature', { 'story-feature--detail': detail }]} id="serials" aria-label="连载作品">
+  <div class="story-feature__art" aria-hidden="true">
+    <Image src={platform} alt="" widths={[640, 1280, 1672]} sizes="(max-width: 47rem) 100vw, 72rem" loading="eager" fetchpriority="high" />
+  </div>
+  <div class="story-feature__content">
+    <div class="work-meta"><span class="work-status">{work ? statusLabel[work.data.status] : '连载'}</span><span>{work ? `${chapters.length} 章${work.data.draft ? ' · 草稿' : ''}` : '故事的起点'}</span></div>
+    <Heading>{work?.data.title ?? '故事尚未落笔'}</Heading>
+    <p class="story-feature__description">{work?.data.description ?? '这里留给慢慢展开的故事。第一部作品，正在酝酿。'}</p>
+    {work?.data.excerpt && <blockquote>{work.data.excerpt}</blockquote>}
+    {work && (!detail || first) && <a class="literary-link" href={detail && first ? chapterUrl(first.id) : seriesUrl(work.id)}>{detail ? '从第一章读起' : '走进故事'} <span aria-hidden="true">→</span></a>}
+    {latest && <a class="story-feature__latest" href={chapterUrl(latest.id)}><span>最新章节</span><span>第 {latest.data.order} 章 · {latest.data.title}</span></a>}
+  </div>
+</section>

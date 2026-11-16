@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { Icon } from 'astro-icon/components';
+import { postUrl } from '@utils/content';
 
 interface Props {
     posts: CollectionEntry<'posts'>[];
@@ -9,6 +10,7 @@ interface Props {
 const { posts } = Astro.props;
 const postMeta = posts.map((post) => ({
     title: post.data.title,
+    url: postUrl(post.id),
     publishedDate: post.data.publishedAt.toISOString().slice(0, 10),
 }));
 ---
@@ -168,7 +170,8 @@ const postMeta = posts.map((post) => ({
             for (const post of monthPosts) {
                 const date = parseDateOnly(post.publishedDate);
                 const item = document.createElement('div');
-                const title = document.createElement('span');
+                const title = document.createElement('a');
+                title.href = post.url;
                 const published = document.createElement('span');
 
                 item.className = 'calendar__post';

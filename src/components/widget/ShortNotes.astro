@@ -9,10 +9,8 @@ const notes = [...personalConfig.notes]
 <section class="side-card notes-card" aria-labelledby="notes-title">
   <div class="side-card__heading">
     <div>
-      <p class="side-card__eyebrow">Little moments</p>
       <h2 id="notes-title">碎碎念</h2>
     </div>
-    <span class="notes-mark" aria-hidden="true">✦</span>
   </div>
   {notes.length > 0 ? (
     <ol>
@@ -28,23 +26,28 @@ const notes = [...personalConfig.notes]
 
 <style lang="stylus">
   .notes-card
-    padding 1.25rem
+    display flex
+    align-items baseline
+    gap 1rem
+    padding .8rem 1.1rem
     min-width 0
 
-  .notes-mark
-    color var(--accent-pink-strong)
-    font-size 1.4rem
+  .side-card__heading
+    flex-shrink 0
+
+  .notes-card h2
+    margin 0
+    font-size .85rem
 
   ol
     display grid
     gap 1rem
-    margin 1rem 0 0
+    margin 0
     padding 0
     list-style none
 
   li
-    padding-left 1rem
-    border-left 2px solid var(--accent-pink)
+    padding-left 0
     overflow-wrap anywhere
 
   time
@@ -53,7 +56,14 @@ const notes = [...personalConfig.notes]
     font-variant-numeric tabular-nums
 
   .notes-card li p
-    margin .25rem 0 0
+    display inline
+    margin 0 0 0 .6rem
     white-space pre-line
-    line-height 1.8
+    line-height 1.6
+
+  @media (max-width: 47rem)
+    .notes-card
+      display block
+    ol
+      margin-top .3rem
 </style>

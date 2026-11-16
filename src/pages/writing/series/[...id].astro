@@ -1,0 +1,27 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import WritingLayout from '@layouts/WritingLayout.astro';
+import StoryFeature from '@components/writing/StoryFeature.astro';
+import { getWriting, chapterUrl, dated } from '@utils/content';
+import { withBasePath } from '@utils/url';
+export async function getStaticPaths() {
+  const { works, chaptersFor } = await getWriting();
+  return works.map(work => ({ params: { id: work.id }, props: { work, chapters: chaptersFor(work.id) } }));
+}
+interface Props { work: CollectionEntry<'series'>; chapters: CollectionEntry<'chapters'>[]; }
+const { work, chapters } = Astro.props;
+const { Content } = await render(work);
+---
+<WritingLayout title={work.data.title} description={work.data.description}>
+  <nav class="breadcrumbs" aria-label="位置"><a href={withBasePath('/writing/')}>创作</a><span>/</span><span>作品目录</span></nav>
+  <StoryFeature work={work} chapters={chapters} detail />
+  {work.body?.trim() && <section class="series-intro markdown-body"><Content /></section>}
+  <section class="writing-section chapter-list" aria-labelledby="chapter-title">
+    <div class="writing-section__heading"><h2 id="chapter-title">章节目录</h2><span>{chapters.length} 章 · {work.data.draft ? '草稿预览' : '按阅读顺序'}</span></div>
+    <ol>{chapters.map(chapter => <li><a href={chapterUrl(chapter.id)}>
+      <span class="chapter-number">{String(chapter.data.order).padStart(2, '0')}</span><span>{chapter.data.title}{chapter.data.draft && ' · 草稿'}</span>
+      <time class="chapter-list__hint" datetime={chapter.data.publishedAt.toISOString()}>{dated(chapter.data.publishedAt)}</time><span aria-hidden="true">→</span>
+    </a></li>)}</ol>
+    {!chapters.length && <p class="writing-empty">故事已启程，章节即将更新。</p>}
+  </section>
+</WritingLayout>

@@ -1,20 +1,21 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { postUrl, taxonomyUrl, dated } from '@utils/content';
 
 interface Props {
   posts: CollectionEntry<'posts'>[];
+  title?: string;
 }
 
-const { posts } = Astro.props;
+const { posts, title = '最新文章' } = Astro.props;
 ---
 
 <section class="article-section" id="articles" aria-labelledby="article-heading">
   <div class="section-heading">
     <div>
-      <p class="section-heading__eyebrow">Latest writing</p>
-      <h2 id="article-heading">最新文章</h2>
+      <h2 id="article-heading">{title}</h2>
     </div>
-    <span>{posts.length.toString().padStart(2, '0')}</span>
+    <span>{posts.length} 篇</span>
   </div>
 
   {
@@ -22,16 +23,17 @@ const { posts } = Astro.props;
       <div class="article-list">
         {posts.map((post) => (
           <article class="article-card">
+            <h3><a href={postUrl(post.id)}>{post.data.title}</a></h3>
             <div class="article-card__meta">
               <time datetime={post.data.publishedAt.toISOString()}>
-                {post.data.publishedAt.toLocaleDateString('zh-CN')}
+                {dated(post.data.publishedAt)}
               </time>
-              <span>{post.data.category}</span>
+              <a href={taxonomyUrl('categories', post.data.category)}>{post.data.category}</a>
+              {post.data.draft && <span>草稿</span>}
             </div>
-            <h3>{post.data.title}</h3>
             <p>{post.data.description}</p>
             <div class="article-card__tags">
-              {post.data.tags.map((tag) => <span>#{tag}</span>)}
+              {post.data.tags.map((tag) => <a href={taxonomyUrl('tags', tag)}>#{tag}</a>)}
             </div>
           </article>
         ))}
