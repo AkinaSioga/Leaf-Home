@@ -13,14 +13,14 @@ export const navBarConfig: NavBarConfig = {
       icon: "material-symbols:folder-open-rounded",
     },
     {
+      name: "创作",
+      href: "/writing/",
+      icon: "material-symbols:menu-book-rounded",
+    },
+    {
       name: "关于",
       href: "/about",
       icon: "material-symbols:person-rounded",
-    },
-    {
-      name: "链接",
-      href: "/#links",
-      icon: "material-symbols:link-rounded",
     },
   ],
 };

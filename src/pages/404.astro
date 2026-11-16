@@ -1,0 +1,11 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Navbar from '@components/layout/Navbar.astro';
+import Footer from '@components/layout/Footer.astro';
+import { withBasePath } from '@utils/url';
+---
+<BaseLayout title="这一页走丢了" noindex>
+  <Navbar compact />
+  <main class="page-shell page-panel not-found"><p>404</p><h1>这一页走丢了</h1><p>也许故事换了一个地方，或这一页还没有写好。</p><a class="back-link" href={withBasePath('/')}>← 回到首页</a></main>
+  <Footer />
+</BaseLayout>

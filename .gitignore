@@ -3,6 +3,8 @@ node_modules/
 
 # Astro build output and generated types
 dist/
+dist-drafts/
+outputs/
 .astro/
 
 # Local environment files
@@ -18,5 +20,6 @@ Thumbs.db
 .idea/
 
 # Local agent settings
+.handoff/
 .claude/settings.local.json
 .codex/

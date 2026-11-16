@@ -1,0 +1,444 @@
+.literary-site
+  --literary-bg #f5f3f0
+  --literary-ink #302d3b
+  --literary-muted #706979
+  --literary-accent #80556e
+  --literary-rule rgba(99, 74, 96, .25)
+  min-height 100vh
+  color var(--literary-ink)
+  background var(--literary-bg)
+
+  .site-nav
+    max-width 72rem
+    width calc(100% - 4rem)
+    background transparent
+    border 0
+    border-bottom 1px solid var(--literary-rule)
+    border-radius 0
+    padding-inline 0
+
+  .site-nav__links a
+    color var(--literary-muted)
+
+    &[aria-current='page'], &:hover
+      color var(--literary-accent)
+      background transparent
+
+  .site-footer
+    max-width 72rem
+    border-color var(--literary-rule)
+    color var(--literary-muted)
+
+:root[data-theme='dark'] .literary-site
+  --literary-bg #10101c
+  --literary-ink #e9e2ee
+  --literary-muted #b3aabd
+  --literary-accent #d5a6bf
+  --literary-rule rgba(200, 166, 189, .3)
+
+@media (prefers-color-scheme: dark)
+  :root:not([data-theme]) .literary-site
+    --literary-bg #10101c
+    --literary-ink #e9e2ee
+    --literary-muted #b3aabd
+    --literary-accent #d5a6bf
+    --literary-rule rgba(200, 166, 189, .3)
+
+.writing-shell
+  max-width 72rem
+  width calc(100% - 4rem)
+  margin-top 2rem
+
+.writing-masthead
+  position relative
+  z-index 2
+  width fit-content
+  h1
+    margin 0
+    font-family "Noto Serif SC", "Source Han Serif SC", "Songti SC", SimSun, serif
+    font-size 2.4rem
+    font-weight 500
+    line-height 1.4
+    letter-spacing .1em
+
+.writing-switch
+  display flex
+  align-items center
+  gap 1.1rem
+  margin-top .75rem
+  color var(--literary-muted)
+  font-family "Noto Serif SC", SimSun, serif
+  font-size 1rem
+  a
+    display inline-flex
+    align-items center
+    min-height 2.75rem
+    color var(--literary-ink)
+    text-decoration none
+    &:hover
+      color var(--literary-accent)
+  span
+    font-size .85rem
+    opacity .6
+
+.story-feature
+  position relative
+  isolation isolate
+  min-height 29rem
+  margin-top 1.6rem
+  display flex
+  align-items center
+
+.story-feature__art
+  position absolute
+  z-index -1
+  inset -9rem -2rem -2rem 0
+  overflow hidden
+  pointer-events none
+
+  img
+    width 100%
+    height 100%
+    object-fit cover
+    object-position center
+
+  // 图片只提供氛围；两层渐变让主题切换后文字仍落在稳定底色上。
+  &::after
+    content ''
+    position absolute
+    inset 0
+    background linear-gradient(90deg, var(--literary-bg) 0%, var(--literary-bg) 15%, transparent 70%), linear-gradient(0deg, var(--literary-bg), transparent 25%, transparent 85%, var(--literary-bg))
+
+.story-feature__content
+  position relative
+  width 55%
+  padding 1.75rem 0 2rem
+
+  h1, h2
+    margin 1.1rem 0 .75rem
+    font-family "Noto Serif SC", "Source Han Serif SC", "Songti SC", SimSun, serif
+    font-size clamp(2.4rem, 4vw, 3.4rem)
+    font-weight 500
+    letter-spacing .08em
+    line-height 1.4
+
+  blockquote
+    position relative
+    margin 1.8rem 0 1.2rem
+    padding-top 1.6rem
+    color var(--literary-ink)
+    font-family "Noto Serif SC", SimSun, serif
+    font-size 1.1rem
+    line-height 1.9
+
+    &::before
+      content ''
+      position absolute
+      top 0
+      left 0
+      width 2rem
+      height 1px
+      background var(--literary-accent)
+
+.story-feature__description
+  max-width 29rem
+  margin 0
+  color var(--literary-muted)
+  font-family "Noto Serif SC", SimSun, serif
+  font-size 1rem
+  line-height 1.9
+
+.work-meta
+  display flex
+  align-items center
+  flex-wrap wrap
+  gap .65rem
+  color var(--literary-muted)
+  font-size .7rem
+
+.work-status
+  padding .15rem .5rem
+  border 1px solid var(--literary-rule)
+  border-radius .2rem
+  color var(--literary-accent)
+
+.literary-link
+  display inline-flex
+  align-items center
+  gap 1rem
+  min-height 2.75rem
+  color var(--literary-accent)
+  font-family "Noto Serif SC", SimSun, serif
+  font-size 1.15rem
+  text-decoration none
+  text-underline-offset .4rem
+  &:hover
+    text-decoration underline
+
+.story-feature__latest
+  display flex
+  flex-wrap wrap
+  gap .4rem 1rem
+  width fit-content
+  margin-top 1.4rem
+  padding .3rem 0
+  color var(--literary-muted)
+  font-size .78rem
+  text-decoration none
+  &:hover
+    color var(--literary-accent)
+
+.writing-section
+  position relative
+  margin-top 1.8rem
+
+.writing-section__heading
+  display flex
+  gap 1.5rem
+  align-items center
+  margin-bottom .5rem
+  h2
+    margin 0
+    flex-shrink 0
+    font-family "Noto Serif SC", SimSun, serif
+    font-size 1.65rem
+    font-weight 500
+    letter-spacing .1em
+  &::after
+    content ''
+    flex 1
+    height 1px
+    background var(--literary-rule)
+  > span
+    order 1
+    color var(--literary-muted)
+    font-size .75rem
+
+.essay-row
+  display grid
+  grid-template-columns minmax(12rem, .8fr) minmax(0, 1.4fr) auto auto
+  align-items center
+  gap 1.5rem
+  padding 1.65rem 0
+  border-bottom 1px solid var(--literary-rule)
+  text-decoration none
+  h3
+    margin 0
+    font-family "Noto Serif SC", SimSun, serif
+    font-size 1.35rem
+    font-weight 500
+  p
+    margin 0
+    padding-left 1.5rem
+    border-left 1px solid var(--literary-rule)
+    color var(--literary-muted)
+    font-family "Noto Serif SC", SimSun, serif
+    font-size .95rem
+    line-height 1.9
+  &:hover h3
+    color var(--literary-accent)
+
+.essay-row__meta
+  color var(--literary-muted)
+  font-size .72rem
+
+.essay-row__arrow
+  color var(--literary-accent)
+  font-size 1.2rem
+
+.breadcrumbs
+  position relative
+  z-index 2
+  display flex
+  flex-wrap wrap
+  gap .8rem
+  width fit-content
+  margin 1rem 0 2rem
+  color var(--literary-muted)
+  font-size .8rem
+  a
+    display inline-flex
+    align-items center
+    min-height 2rem
+    text-decoration none
+    &:hover
+      color var(--literary-accent)
+  > span
+    align-self center
+
+.story-feature--detail
+  margin-top 0
+  min-height 29rem
+  .story-feature__art
+    top -4rem
+
+.chapter-list
+  ol
+    list-style none
+    margin 0
+    padding 0
+  li a
+    display flex
+    align-items center
+    gap 1.5rem
+    padding 1.4rem .25rem
+    border-bottom 1px solid var(--literary-rule)
+    text-decoration none
+    font-family "Noto Serif SC", SimSun, serif
+    font-size 1.05rem
+  li a:hover
+    color var(--literary-accent)
+
+.chapter-number, .chapter-list__hint
+  color var(--literary-muted)
+  font-family inherit
+  font-size .8rem
+
+.chapter-list__hint
+  margin-left auto
+
+.reading-page
+  max-width 42rem
+  margin 2.5rem auto 0
+
+.reading-heading
+  text-align center
+  padding 0 0 2rem
+  border-bottom 1px solid var(--literary-rule)
+  h1
+    font-family "Noto Serif SC", SimSun, serif
+    font-size clamp(1.8rem, 4vw, 2.4rem)
+    font-weight 500
+    line-height 1.6
+    letter-spacing .08em
+    margin .8rem 0
+
+.writing-kicker
+  color var(--literary-accent)
+  font-size .8rem
+  letter-spacing .12em
+
+.reading-meta
+  color var(--literary-muted)
+  font-size .75rem
+
+.reading-body
+  padding-top 1.25rem
+  font-family "Noto Serif SC", "Source Han Serif SC", "Songti SC", SimSun, serif
+  font-size 1.15rem
+  line-height 2.15
+  letter-spacing .035em
+  p
+    margin 1.3em 0
+    text-indent 2em
+
+.reading-end
+  margin 3rem 0 2rem
+  text-align center
+  color var(--literary-muted)
+  font-size .75rem
+  span
+    color var(--literary-accent)
+
+.reader-nav
+  display flex
+  justify-content space-between
+  gap 1rem
+  padding 1.2rem 0
+  border-top 1px solid var(--literary-rule)
+  font-size .8rem
+  a
+    display inline-flex
+    align-items center
+    min-height 2.75rem
+    text-decoration none
+    color var(--literary-accent)
+
+@media (max-width: 60rem)
+  .essay-row
+    grid-template-columns minmax(10rem, 1fr) minmax(0, 1.3fr) auto
+    gap 1rem
+  .essay-row__meta
+    display none
+
+@media (max-width: 47rem)
+  .literary-site .site-nav
+    width calc(100% - 2rem)
+    padding-inline 0
+  .writing-shell
+    width calc(100% - 2.5rem)
+    margin-top 1.5rem
+  .writing-masthead h1
+    font-size 2rem
+  .writing-switch
+    margin-top .25rem
+  .story-feature
+    min-height 0
+    margin-top .4rem
+    padding-top 11rem
+  .story-feature__art
+    inset -4rem -1.25rem auto
+    height 31rem
+    img
+      object-position 76% center
+    &::after
+      background linear-gradient(0deg, var(--literary-bg) 0%, transparent 75%), linear-gradient(180deg, var(--literary-bg) 0%, transparent 25%)
+  .story-feature__content
+    width 100%
+    padding 2rem 0 .5rem
+    h1, h2
+      margin .75rem 0 .6rem
+      font-size 2.5rem
+    blockquote
+      margin 1.3rem 0 .7rem
+      padding-top 1.3rem
+      font-size 1rem
+  .story-feature__description
+    font-size .95rem
+  .story-feature__latest
+    margin-top .85rem
+  .writing-section
+    margin-top 2rem
+  .writing-section__heading
+    gap 1rem
+    h2
+      font-size 1.45rem
+    > span
+      display none
+  .essay-row
+    grid-template-columns minmax(0, 1fr) auto
+    gap .7rem 1rem
+    padding 1.4rem 0
+    h3
+      font-size 1.2rem
+    p
+      grid-column 1
+      grid-row 2
+      padding 0
+      border 0
+      font-size .9rem
+  .essay-row__arrow
+    grid-column 2
+    grid-row 1 / 3
+  .breadcrumbs
+    margin 0 0 1rem
+  .story-feature--detail
+    padding-top 12rem
+    .story-feature__art
+      top -1rem
+  .chapter-list__hint
+    display none
+  .reading-page
+    margin-top 2rem
+  .reading-heading
+    padding-bottom 1.25rem
+  .reading-body
+    font-size 1.08rem
+    line-height 2.05
+    padding-top .75rem
+  .reader-nav
+    font-size .75rem
+
+  // 浅色模式提早淡出夜景，避免小字落在深色插画上。
+  :root[data-theme='light'] .story-feature__art::after
+    background linear-gradient(0deg, var(--literary-bg) 0%, var(--literary-bg) 45%, transparent 85%), linear-gradient(180deg, var(--literary-bg) 0%, transparent 25%)

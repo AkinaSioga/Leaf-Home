@@ -1,6 +1,10 @@
 # Leaf-Home
 Astro Blog
 
+## 写作与本地预览
+
+首页文章、连载作品与章节、独立散文均使用 Markdown。复制模板、草稿预览和发布说明见 [写作指南](WRITING.md)。运行 `pnpm preview:drafts` 后可在本地 4323 端口检查完整阅读流程。
+
 ## 部署
 
 `main` 分支更新后由 GitHub Actions 检查、构建并发布到 `https://akinasuki.love`。
@@ -12,7 +16,7 @@ Astro Blog
 
 - `now`：最近在折腾。`updatedAt` 为更新时间，`items` 中的 `status` 可填 `ongoing`（进行中）、`done`（已完成）、`planned`（想做）。
 - `notes`：碎碎念。每条填写 `date`（`YYYY-MM-DD`）和 `text`，首页按日期降序显示最近三条。
-- `bookmarks`：小书签。每条填写 `title`、完整 HTTP(S) 地址 `url` 和推荐理由 `description`；留空时显示空状态。链接在当前标签页打开。
+- `bookmarks`：小书签。每条填写 `title`、完整 HTTP(S) 地址 `url` 和推荐理由 `description`；留空时隐藏书签区和导航入口。链接在当前标签页打开。
 
 三个组件均在构建期生成，无需客户端 JavaScript。初始动态来自博客项目的实际进展，书签暂未填写。
 

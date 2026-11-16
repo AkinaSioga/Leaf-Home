@@ -1,0 +1,10 @@
+---
+import { siteConfig } from '@config/site';
+interface Props { stats?: { posts: number; categories: number; tags: number }; }
+const { stats } = Astro.props;
+---
+<footer class="site-footer">
+  <p>© {new Date().getFullYear()} {siteConfig.author}</p>
+  {stats && <p>{stats.posts} 篇文章 · {stats.categories} 个分类 · {stats.tags} 个标签</p>}
+  <p>Built quietly with Astro.</p>
+</footer>

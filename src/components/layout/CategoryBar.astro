@@ -1,30 +1,29 @@
 ---
-import { Icon } from 'astro-icon/components';
+import { taxonomyUrl } from '@utils/content';
 import { withBasePath } from '@utils/url';
 
 interface Props {
   categoryCounts: Map<string, number>;
+  active?: string;
 }
 
-const { categoryCounts } = Astro.props;
+const { categoryCounts, active } = Astro.props;
 
 const categories = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1]);
-const homeHref = withBasePath('/');
 ---
 
 <nav class="category-bar" aria-label="文章分类">
-    <a class="category-pill category-pill--home" href={homeHref} aria-label="首页" aria-current="page">
-      <Icon name="material-symbols:home-rounded" aria-hidden="true" />
+    <a class:list={['category-pill', { 'category-pill--home': !active }]} href={withBasePath('/#articles')} aria-current={!active ? 'page' : undefined}>
+      全部
     </a>
-  <span class="category-bar__divider" aria-hidden="true"></span>
 
   <div class="category-bar__scroll">
     {
       categories.map(([name, count]) => (
-        <span class="category-pill">
+        <a class:list={['category-pill', { 'category-pill--home': active === name }]} href={taxonomyUrl('categories', name)} aria-current={active === name ? 'page' : undefined}>
           {name}
           <span class="category-pill__count">{count}</span>
-        </span>
+        </a>
       ))
     }
   </div>
@@ -36,12 +35,7 @@ const homeHref = withBasePath('/');
     align-items center
     gap .5rem
     min-width 0
-    padding .75rem
-    border 1px solid var(--line-soft)
-    border-radius var(--radius-md)
-    background var(--surface)
-    box-shadow var(--shadow-soft)
-    backdrop-filter blur(18px)
+    padding 0
 
   .category-pill
     display inline-flex
@@ -49,11 +43,11 @@ const homeHref = withBasePath('/');
     align-items center
     justify-content center
     gap .4rem
-    min-height 2.25rem
+    min-height 2.75rem
     padding .35rem .85rem
     border-radius .75rem
     color var(--text-secondary)
-    background var(--surface-muted)
+    background transparent
     font-size .86rem
     font-weight 600
     line-height 1
@@ -65,21 +59,14 @@ const homeHref = withBasePath('/');
     background var(--surface-raised)
 
   .category-pill--home
-    width 2.5rem
-    padding 0
-    color #fff
-    background linear-gradient(135deg, var(--accent-blue), var(--accent-pink))
+    color var(--text-primary)
+    background var(--surface-muted)
+    box-shadow inset 0 -2px 0 var(--accent-pink)
 
   .category-pill__count
     color var(--text-soft)
     font-size .68rem
     font-weight 700
-
-  .category-bar__divider
-    width 1px
-    align-self stretch
-    flex-shrink 0
-    background var(--line-soft)
 
   .category-bar__scroll
     display flex

@@ -1,0 +1,14 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import ArchiveLayout from '@layouts/ArchiveLayout.astro';
+import { getPosts } from '@utils/content';
+export async function getStaticPaths() {
+  const allPosts = await getPosts();
+  return [...new Set(allPosts.map(post => post.data.category))].map(category => ({
+    params: { category }, props: { category, allPosts, posts: allPosts.filter(post => post.data.category === category) },
+  }));
+}
+interface Props { category: string; posts: CollectionEntry<'posts'>[]; allPosts: CollectionEntry<'posts'>[]; }
+const { category, posts, allPosts } = Astro.props;
+---
+<ArchiveLayout title={category} category={category} posts={posts} allPosts={allPosts} />

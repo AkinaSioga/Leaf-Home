@@ -1,15 +1,19 @@
 ---
 import { siteConfig } from '@config/site';
 import '@styles/global.styl';
+import '@styles/markdown.styl';
+import { previewContent } from '@utils/content';
 
 interface Props {
   title?: string;
   description?: string;
+  noindex?: boolean;
 }
 
 const {
   title = siteConfig.name,
   description = siteConfig.description,
+  noindex = false,
 } = Astro.props;
 
 const pageTitle = title === siteConfig.name ? title : `${title} · ${siteConfig.name}`;
@@ -22,6 +26,7 @@ const pageTitle = title === siteConfig.name ? title : `${title} · ${siteConfig.
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
+    {(noindex || previewContent) && <meta name="robots" content="noindex, nofollow" />}
     <meta name="theme-color" content="#f6f7ff" />
     <title>{pageTitle}</title>
     <script is:inline>
@@ -49,6 +54,7 @@ const pageTitle = title === siteConfig.name ? title : `${title} · ${siteConfig.
     </script>
   </head>
   <body>
+    {previewContent && <aside class="draft-banner">本地草稿预览 · 含排版示例，正式构建不会发布草稿</aside>}
     <slot />
   </body>
 </html>

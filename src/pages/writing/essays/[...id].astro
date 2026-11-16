@@ -1,0 +1,22 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import WritingLayout from '@layouts/WritingLayout.astro';
+import { getWriting, dated } from '@utils/content';
+import { withBasePath } from '@utils/url';
+export async function getStaticPaths() {
+  const { essays } = await getWriting();
+  return essays.map(essay => ({ params: { id: essay.id }, props: { essay } }));
+}
+interface Props { essay: CollectionEntry<'essays'>; }
+const { essay } = Astro.props;
+const { Content } = await render(essay);
+---
+<WritingLayout title={essay.data.title} description={essay.data.description}>
+  <nav class="breadcrumbs" aria-label="位置"><a href={withBasePath('/writing/')}>创作</a><span>/</span><a href={withBasePath('/writing/#essays')}>散文</a></nav>
+  <article class="reading-page">
+    <header class="reading-heading"><p class="writing-kicker">散文</p><h1>{essay.data.title}</h1><p class="reading-meta"><time datetime={essay.data.publishedAt.toISOString()}>{dated(essay.data.publishedAt)}</time>{essay.data.updatedAt && ` · 更新于 ${dated(essay.data.updatedAt)}`}{essay.data.draft && ' · 草稿'}</p></header>
+    <div class="reading-body markdown-body"><Content /></div>
+    <div class="reading-end"><span aria-hidden="true">✦</span><p>全文完</p></div>
+    <nav class="reader-nav" aria-label="阅读导航"><a href={withBasePath('/writing/#essays')}>← 返回散文</a><a href={withBasePath('/writing/')}>创作首页 →</a></nav>
+  </article>
+</WritingLayout>

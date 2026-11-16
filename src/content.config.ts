@@ -20,4 +20,36 @@ const posts = defineCollection({
   }),
 });
 
-export const collections = { posts };
+const publication = {
+  title: z.string().min(1),
+  publishedAt: z.coerce.date(),
+  updatedAt: z.coerce.date().optional(),
+  draft: z.boolean().default(true),
+};
+
+const series = defineCollection({
+  loader: glob({ base: './src/content/series', pattern: '**/*.md' }),
+  schema: z.object({
+    ...publication,
+    description: z.string().min(1),
+    status: z.enum(['serializing', 'completed', 'paused']).default('serializing'),
+    excerpt: z.string().optional(),
+    featured: z.boolean().default(false),
+  }),
+});
+
+const chapters = defineCollection({
+  loader: glob({ base: './src/content/chapters', pattern: '**/*.md' }),
+  schema: z.object({
+    ...publication,
+    series: z.string().min(1),
+    order: z.number().int().positive(),
+  }),
+});
+
+const essays = defineCollection({
+  loader: glob({ base: './src/content/essays', pattern: '**/*.md' }),
+  schema: z.object({ ...publication, description: z.string().min(1) }),
+});
+
+export const collections = { posts, series, chapters, essays };

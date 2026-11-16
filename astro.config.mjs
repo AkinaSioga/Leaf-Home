@@ -11,6 +11,7 @@ export default defineConfig({
   // 因此 base 保持默认的 '/'，无需设置。
   site,
   base,
+  devToolbar: { enabled: false },
   integrations: [icon(), svelte()],
   vite: {
     resolve: {

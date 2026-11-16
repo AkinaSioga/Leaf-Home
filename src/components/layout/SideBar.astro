@@ -1,28 +1,24 @@
 ---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
 import { siteConfig } from '@config/site';
+import { personalConfig } from '@config/personal';
 import avatar from '@assets/avatar.jpg';
 import Now from '@components/widget/Now.astro';
 import Bookmarks from '@components/widget/Bookmarks.astro';
+import RightSideBar from './RightSideBar.astro';
+interface Props { posts: CollectionEntry<'posts'>[]; tagCounts: Map<string, number>; }
+const { posts, tagCounts } = Astro.props;
 ---
-
-<aside class="sidebar" aria-label="博客侧栏">
+<aside class="sidebar" aria-label="个人与归档">
   <section class="side-card profile-card">
-    <img
-      class="profile-card__avatar"
-      src={avatar.src}
-      alt={`${siteConfig.author} 的头像`}
-      width={avatar.width}
-      height={avatar.height}
-    />
-    <p class="side-card__eyebrow">About me</p>
-    <h2>{siteConfig.author}</h2>
-    <p>{siteConfig.description}</p>
-    <div class="profile-card__status">
-      <span aria-hidden="true"></span>
-      正在虚质空间漂流中……
+    <div class="profile-card__intro">
+      <Image class="profile-card__avatar" src={avatar} alt={`${siteConfig.author} 的头像`} width={88} height={88} />
+      <div><h2>{siteConfig.author}</h2><p>{siteConfig.description}</p></div>
     </div>
+    <div class="profile-card__status"><span aria-hidden="true"></span>正在虚质空间漂流中……</div>
   </section>
-
   <Now />
-  <Bookmarks />
+  <RightSideBar posts={posts} tagCounts={tagCounts} />
+  {personalConfig.bookmarks.length > 0 && <Bookmarks />}
 </aside>
