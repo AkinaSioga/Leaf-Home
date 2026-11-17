@@ -6,13 +6,13 @@ import logoImg from '@assets/logo.png';
 import { navBarConfig } from '@config/navBarConfig';
 import { siteConfig } from '@config/site';
 import LightDarkSwitch from '@components/controls/LightDarkSwitch.svelte';
+import BubbleText from './BubbleText.astro';
 import { withBasePath } from '@utils/url';
 
 interface Props { compact?: boolean; title?: string; subtitle?: string; }
 const { compact = false, title = siteConfig.heroTitle, subtitle = siteConfig.heroSubtitle } = Astro.props;
 const links = navBarConfig.links;
 const isHome = Astro.props.title === undefined;
-const lightLines = siteConfig.lightHeroTitle.split(/(?<=，)/);
 const lightHero = await getImage({ src: lightHeroImage, width: 1280, format: 'webp', quality: 88 });
 const currentPath = Astro.url.pathname.replace(/\/$/, '');
 
@@ -53,10 +53,8 @@ const homeHref = withBasePath('/');
   {!compact && <div class="hero__content">
     <div class="hero__copy">
       <div class="hero__quote">
-        <div class="hero__words">
-          <h1>{isHome ? <><span class="theme-light-only">{lightLines.map(line => <span>{line}</span>)}</span><span class="theme-dark-only">{title}</span></> : title}</h1>
-          <p class="hero__subtitle">{isHome ? <><span class="theme-light-only">{siteConfig.lightHeroSubtitle}</span><span class="theme-dark-only">{subtitle}</span></> : subtitle}</p>
-        </div>
+        <h1>{isHome ? <><span class="theme-light-only"><BubbleText text={siteConfig.lightHeroTitle} splitLines /></span><span class="theme-dark-only"><BubbleText text={title} /></span></> : title}</h1>
+        <p class="hero__subtitle">{isHome ? <><span class="theme-light-only"><BubbleText text={siteConfig.lightHeroSubtitle} /></span><span class="theme-dark-only"><BubbleText text={subtitle} /></span></> : subtitle}</p>
         {isHome && <span class="hero__bubbles" aria-hidden="true">{[0, 1, 2, 3, 4].map(() => <span />)}</span>}
       </div>
     </div>
@@ -69,11 +67,6 @@ const homeHref = withBasePath('/');
     position relative
     width fit-content
     max-width 100%
-
-  // The whole quote stays readable between gentle bubble-like entrances and exits.
-  .hero--home .hero__words
-    transform-origin center
-    animation hero-quote-float 11s ease-in-out infinite
 
   .hero__bubbles
     position absolute
@@ -117,24 +110,6 @@ const homeHref = withBasePath('/');
         top 70%
         animation-delay .5s
 
-  @keyframes hero-quote-float
-    0%
-      opacity 0
-      transform translateY(12px) scale(.985)
-      filter blur(1.5px)
-    16%
-      opacity 1
-      transform translateY(0) scale(1)
-      filter blur(0)
-    74%
-      opacity 1
-      transform translateY(-2px) scale(1)
-      filter blur(0)
-    96%, 100%
-      opacity 0
-      transform translateY(-16px) scale(1.012)
-      filter blur(2px)
-
   @keyframes hero-quote-bubble
     0%, 70%
       opacity 0
@@ -146,8 +121,6 @@ const homeHref = withBasePath('/');
       transform translate(var(--bubble-drift), -30px) scale(1.15)
 
   @media (prefers-reduced-motion: reduce)
-    .hero--home .hero__words
-      animation none
     .hero__bubbles
       display none
 </style>
