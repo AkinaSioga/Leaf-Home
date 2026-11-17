@@ -7,7 +7,7 @@ let offset = 0;
 // Each language uses the same entrance window, even when its character count differs.
 const glyphLines = lines.map(line => Array.from(line).map(glyph => ({
   glyph,
-  delay: Math.round(offset++ / lastIndex * 1800),
+  delay: Math.round(offset++ / lastIndex * 3200),
 })));
 ---
 
@@ -33,7 +33,7 @@ const glyphLines = lines.map(line => Array.from(line).map(glyph => ({
     display inline-block
     white-space pre
     transform-origin center 65%
-    animation hero-letter-bubble 11s ease-in-out infinite both
+    animation hero-letter-bubble 16s ease-in-out infinite both
     animation-delay var(--bubble-delay)
 
   @keyframes hero-letter-bubble
