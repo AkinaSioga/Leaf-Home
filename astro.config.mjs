@@ -12,6 +12,9 @@ export default defineConfig({
   site,
   base,
   devToolbar: { enabled: false },
+  markdown: {
+    shikiConfig: { theme: 'github-dark-default' },
+  },
   integrations: [icon(), svelte()],
   vite: {
     resolve: {

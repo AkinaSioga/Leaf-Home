@@ -21,6 +21,7 @@
     p
       text-indent 0
   pre
+    min-width 0
     max-width 100%
     overflow-x auto
     padding 1.2rem
@@ -28,6 +29,11 @@
     font-size .85rem
     line-height 1.75
     letter-spacing 0
+    border 1px solid rgba(139, 148, 158, .2)
+    tab-size 2
+    code
+      font-family var(--font-site)
+      font-size inherit
   :not(pre) > code
     padding .15em .35em
     border-radius .25rem
@@ -139,12 +145,12 @@
 .series-intro
   max-width 42rem
   color var(--literary-muted)
-  font-family "Noto Serif SC", SimSun, serif
+  font-family var(--font-site)
 
 .writing-empty
   padding 1.5rem 0
   color var(--literary-muted)
-  font-family "Noto Serif SC", SimSun, serif
+  font-family var(--font-site)
   line-height 1.9
   border-bottom 1px solid var(--literary-rule)
 
