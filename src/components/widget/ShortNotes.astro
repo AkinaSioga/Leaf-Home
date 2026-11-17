@@ -1,5 +1,6 @@
 ---
 import { personalConfig } from '@config/personal';
+import { Icon } from 'astro-icon/components';
 
 const notes = [...personalConfig.notes]
   .sort((a, b) => b.date.localeCompare(a.date))
@@ -9,7 +10,7 @@ const notes = [...personalConfig.notes]
 <section class="side-card notes-card" aria-labelledby="notes-title">
   <div class="side-card__heading">
     <div>
-      <h2 id="notes-title">碎碎念</h2>
+      <h2 id="notes-title"><Icon name="material-symbols:chat-bubble-outline-rounded" aria-hidden="true" />碎碎念</h2>
     </div>
   </div>
   {notes.length > 0 ? (
@@ -26,18 +27,14 @@ const notes = [...personalConfig.notes]
 
 <style lang="stylus">
   .notes-card
-    display flex
-    align-items baseline
-    gap 1rem
-    padding .8rem 1.1rem
+    display block
     min-width 0
 
   .side-card__heading
     flex-shrink 0
 
   .notes-card h2
-    margin 0
-    font-size .85rem
+    margin 0 0 .8rem
 
   ol
     display grid
@@ -56,8 +53,8 @@ const notes = [...personalConfig.notes]
     font-variant-numeric tabular-nums
 
   .notes-card li p
-    display inline
-    margin 0 0 0 .6rem
+    display block
+    margin .4rem 0 0
     white-space pre-line
     line-height 1.6
 

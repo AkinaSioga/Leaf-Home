@@ -3,21 +3,24 @@ import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import Navbar from '@components/layout/Navbar.astro';
 import Footer from '@components/layout/Footer.astro';
-import CategoryBar from '@components/layout/CategoryBar.astro';
-import ArticleList from '@components/layout/ArticleList.astro';
+import ArticleTimeline from '@components/layout/ArticleTimeline.astro';
+import SideBar from '@components/layout/SideBar.astro';
+import RightSideBar from '@components/layout/RightSideBar.astro';
 import { buildTaxonomyCounts } from '@utils/postStats';
 import { withBasePath } from '@utils/url';
 interface Props { title: string; posts: CollectionEntry<'posts'>[]; allPosts: CollectionEntry<'posts'>[]; category?: string; }
 const { title, posts, allPosts, category } = Astro.props;
-const { categoryCounts } = buildTaxonomyCounts(allPosts);
+const { categoryCounts, tagCounts } = buildTaxonomyCounts(allPosts);
 ---
 <BaseLayout title={title}>
-  <Navbar compact />
-  <main class="page-shell archive-page">
-    <a class="back-link" href={withBasePath('/#articles')}>← 全部文章</a>
-    <header class="archive-heading"><p>文章归档</p><h1>{title}</h1></header>
-    <CategoryBar categoryCounts={categoryCounts} active={category ?? '__tag__'} />
-    <ArticleList posts={posts} title="收录文章" />
+  <Navbar title={title} subtitle="在文字之间，慢慢翻阅。" />
+  <main class="home-shell home-shell--archive">
+    <div class="content-column">
+      <a class="back-link" href={withBasePath('/posts/')}>← 全部文章</a>
+      <ArticleTimeline posts={posts} title={title} />
+    </div>
+    <SideBar categoryCounts={categoryCounts} tagCounts={tagCounts} active={category ?? '__tag__'} />
+    <RightSideBar posts={allPosts} />
   </main>
-  <Footer />
+  <Footer stats={{ posts: allPosts.length, categories: categoryCounts.size, tags: tagCounts.size }} />
 </BaseLayout>

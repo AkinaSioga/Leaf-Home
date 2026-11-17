@@ -9,13 +9,8 @@ export const navBarConfig: NavBarConfig = {
     },
     {
       name: "文章",
-      href: "/#articles",
+      href: "/posts/",
       icon: "material-symbols:folder-open-rounded",
-    },
-    {
-      name: "创作",
-      href: "/writing/",
-      icon: "material-symbols:menu-book-rounded",
     },
     {
       name: "关于",

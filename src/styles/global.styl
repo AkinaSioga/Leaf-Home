@@ -13,7 +13,7 @@ body
   min-height 100vh
   margin 0
   color var(--text-primary)
-  background radial-gradient(ellipse at 8% 35%, rgba(102, 140, 255, .07), transparent 35rem), radial-gradient(ellipse at 96% 80%, rgba(255, 131, 182, .06), transparent 30rem), var(--page-bg)
+  background radial-gradient(ellipse 55rem 35rem at 10% 34rem, var(--ambient-rose), transparent 75%), radial-gradient(ellipse 60rem 40rem at 95% 65rem, var(--ambient-blue), transparent 75%), var(--page-bg)
   font-family var(--font-site)
   font-weight 500
   line-height 1.7
@@ -24,47 +24,50 @@ a
 button, a, summary
   -webkit-tap-highlight-color transparent
 
-button, input, textarea, select
-  font inherit
-
-code, pre, kbd, samp
+button, input, textarea, select, code, pre, kbd, samp
   font-family var(--font-site)
 
 :focus-visible
-  outline 3px solid var(--accent-blue)
+  outline 3px solid var(--focus-ring)
   outline-offset 4px
 
 [hidden]
   display none !important
 
+.theme-light-only
+  display var(--light-display)
+
+.theme-dark-only
+  display var(--dark-display)
+
 .hero
+  --hero-bg var(--hero-image-light)
   position relative
   isolation isolate
-  min-height 28rem
-  color #fff
-  background #101a34
-
+  padding-top 1rem
+  color var(--hero-text)
+  background var(--page-bg-accent)
   &::before
     content ''
     position absolute
-    inset 4.5rem 0 0
-    z-index -2
-    background linear-gradient(90deg, rgba(8, 14, 39, .55), rgba(8, 14, 39, .05) 65%), var(--hero-image) center 35% / cover no-repeat
-
-  &::after
-    content ''
-    position absolute
-    inset auto 0 0
-    height 4rem
+    inset 0
     z-index -1
-    background linear-gradient(transparent, var(--page-bg))
+    background-image var(--hero-overlay), var(--hero-bg)
+    background-position center, var(--hero-position)
+    background-size cover
+    background-repeat no-repeat
 
 .hero--compact
-  min-height 0
   background none
-
-  &::before, &::after
+  &::before
     display none
+
+:root[data-theme='dark'] .hero
+  --hero-bg var(--hero-image-dark)
+
+@media (prefers-color-scheme: dark)
+  :root:not([data-theme]) .hero
+    --hero-bg var(--hero-image-dark)
 
 .site-nav
   position relative
@@ -75,18 +78,18 @@ code, pre, kbd, samp
   gap 1.5rem
   width calc(100% - 3rem)
   max-width var(--content-width)
-  min-height 4.5rem
+  min-height 3.75rem
   margin auto
-  padding .65rem 1.25rem
+  padding .35rem 1.25rem
   border 1px solid var(--line-soft)
-  border-top 0
-  border-radius 0 0 1rem 1rem
+  border-radius 1.25rem
   background var(--surface-raised)
+  box-shadow var(--shadow-soft)
 
 .site-nav__brand
   display inline-flex
   align-items center
-  gap .7rem
+  gap .65rem
   width fit-content
   color var(--text-primary)
   font-size 1.1rem
@@ -95,416 +98,352 @@ code, pre, kbd, samp
   white-space nowrap
 
 .site-nav__logo
-  width 2.25rem
-  height 2.25rem
-  border-radius .55rem
-  object-fit cover
+  width 2.1rem
+  height 2.1rem
+  object-fit contain
+  filter var(--logo-filter)
+  mix-blend-mode var(--logo-blend)
 
 .site-nav__links
   display flex
   align-items center
   gap .45rem
-
   a
-    position relative
     display inline-flex
     align-items center
     justify-content center
-    min-height 2.75rem
-    padding .4rem .9rem
-    border-radius .5rem
+    min-height 2.5rem
+    padding .35rem 1.1rem
+    border-radius .85rem
     color var(--text-secondary)
     font-size .95rem
-    font-weight 600
+    font-weight 650
     white-space nowrap
     text-decoration none
-
-    &:hover
-      color var(--accent-pink-strong)
-      background var(--surface-muted)
-
-    &[aria-current='page']
-      color var(--accent-pink-strong)
-
-      &::after
-        content ''
-        position absolute
-        bottom .15rem
-        left 30%
-        right 30%
-        height 2px
-        background currentColor
+    transition background .2s, color .2s
+    &:hover, &[aria-current='page']
+      color var(--accent-blue-strong)
+      background var(--accent-tint)
 
 .site-nav__theme
   position relative
 
 .hero__content
-  width calc(100% - 5rem)
-  max-width calc(var(--content-width) - 2rem)
-  margin 5.5rem auto 0
-  padding-bottom 6rem
+  width calc(100% - 7rem)
+  max-width calc(var(--content-width) - 4rem)
+  margin auto
+  min-height 23rem
+  display flex
+  align-items center
+  padding 3rem 0 5rem
 
+.hero__copy
+  width var(--hero-copy-width)
+  margin-left var(--hero-copy-align)
   h1
     margin 0
-    max-width 55%
-    font-family var(--font-site)
-    font-size clamp(2rem, 3.6vw, 3.2rem)
-    font-weight 600
-    line-height 1.4
-    letter-spacing .07em
-    text-shadow 0 2px 15px rgba(8, 14, 39, .35)
+    font-size clamp(1.9rem, 3vw, 2.85rem)
+    line-height 1.55
+    font-weight 700
+    letter-spacing .045em
+    text-wrap balance
+    text-shadow 0 2px 20px rgba(22, 25, 42, .12)
+  h1 .theme-light-only
+    font-size clamp(1rem, 2vw, 2rem)
+    line-height 1.8
+    letter-spacing .02em
+    > span
+      display block
+      white-space nowrap
 
 .hero__subtitle
-  max-width 50%
   margin 1rem 0 0
-  color #ecedf7
   font-size 1rem
-  text-shadow 0 1px 8px #10182f
+  text-shadow 0 1px 10px rgba(22, 25, 42, .18)
+
+// Let the light quote hug the right inset instead of occupying the portrait area.
+.hero--home .hero__content
+  width var(--home-hero-width)
+  max-width var(--home-hero-max-width)
+
+.hero--home .hero__copy
+  width var(--home-hero-copy-width)
+
+.hero__edge
+  position absolute
+  bottom -1px
+  left 0
+  width 100%
+  height 3.2rem
+  color var(--page-bg)
+  pointer-events none
 
 .home-shell
   position relative
   z-index 2
   display grid
-  grid-template-columns var(--sidebar-width) minmax(0, 1fr)
-  grid-template-areas 'sidebar content'
+  grid-template-columns var(--sidebar-width) minmax(0, 1fr) var(--utility-width)
+  grid-template-areas 'sidebar content utility'
   align-items start
-  gap 1.5rem
+  gap 1.25rem
   width calc(100% - 3rem)
   max-width var(--content-width)
-  margin -1.5rem auto 0
+  margin .5rem auto 0
+
+.home-shell--compact
+  margin-top 1.5rem
 
 .content-column
   display grid
   grid-area content
   min-width 0
-  gap 1.25rem
+  gap 1rem
 
-.sidebar
+.sidebar, .utility-sidebar
   display grid
-  grid-area sidebar
   min-width 0
   gap 1rem
+
+.sidebar
+  grid-area sidebar
+
+.utility-sidebar
+  grid-area utility
 
 .side-card, .article-card, .page-panel
   border 1px solid var(--line-soft)
   border-radius var(--radius-md)
   background var(--surface-raised)
+  box-shadow var(--shadow-soft)
 
 .side-card
   min-width 0
-  padding 1.1rem
-
+  padding 1rem
   h2
-    margin 0 0 .65rem
-    font-size 1rem
+    display flex
+    align-items center
+    gap .5rem
+    margin 0 0 .8rem
+    font-size .95rem
     font-weight 700
-
+    [data-icon]
+      width 1.15rem
+      height 1.15rem
+      flex-shrink 0
+      color var(--accent-blue)
   p
     margin .3rem 0 0
     color var(--text-secondary)
     font-size .85rem
-
-.side-card__eyebrow, .section-heading__eyebrow
-  margin 0 0 .3rem
-  color var(--accent-blue-strong)
-  font-size .7rem
-  font-weight 650
-  letter-spacing .1em
-  text-transform uppercase
-
-.profile-card__intro
-  display flex
-  gap .9rem
-  align-items center
-
-.profile-card__avatar
-  flex-shrink 0
-  width 4.5rem
-  height 4.5rem
-  object-fit cover
-  border-radius .75rem
-
-.profile-card h2
-  margin-bottom .15rem
-  font-size 1.05rem
-
-.profile-card__status
-  display flex
-  align-items center
-  gap .5rem
-  margin-top 1rem
-  color var(--text-soft)
-  font-size .75rem
-
-  span
-    width .45rem
-    height .45rem
-    flex-shrink 0
-    border-radius 50%
-    background #66c99a
-
-.side-card__count
-  color var(--text-soft)
-  font-size .8rem
 
 .side-card__heading
   display flex
   justify-content space-between
   align-items center
 
-.tag-cloud
-  display flex
-  flex-wrap wrap
-  gap .4rem
+.side-card__eyebrow, .section-heading__eyebrow
+  color var(--accent-blue-strong)
+  font-size .7rem
+  letter-spacing .1em
 
-  a
-    padding .2rem .6rem
-    border-radius .45rem
-    color var(--text-secondary)
-    background var(--surface-muted)
-    font-size .75rem
-
-.archive-card
-  padding 0
-
-  summary
-    cursor pointer
-    padding 1rem 1.1rem
-    font-size .95rem
-    font-weight 650
-
-  .archive-card__body
-    padding 0 .85rem 1rem
-
-  .archive-list
-    padding-left 1.3rem
-    color var(--text-secondary)
-    font-size .8rem
-
-.article-section
-  min-width 0
+.side-card__count
+  color var(--text-soft)
+  font-size .8rem
 
 .section-heading
   display flex
   align-items center
-  justify-content space-between
-  gap 1rem
-  margin .2rem 0 1rem
-
+  gap .7rem
+  margin 0 0 1rem
+  padding .9rem 1.25rem
+  border-radius var(--radius-md)
+  background var(--surface-raised)
+  border 1px solid var(--line-soft)
+  box-shadow var(--shadow-soft)
   h2, h1
+    position relative
     margin 0
-    font-size 1.4rem
+    padding-left .8rem
+    font-size 1.2rem
     line-height 1.5
     font-weight 700
-
-  > span
-    color var(--text-soft)
-    font-size .8rem
-
-.article-list
-  display grid
-  gap 1rem
-
-.article-card
-  padding 1.5rem 1.65rem
-
-  h3
-    position relative
-    margin 0 0 .6rem
-    font-size 1.35rem
-    line-height 1.5
-
     &::before
       content ''
       position absolute
-      left -1.65rem
-      top .3rem
-      width 3px
-      height 1.3rem
-      border-radius 2px
+      top .2em
+      bottom .2em
+      left 0
+      width 4px
+      border-radius 4px
       background var(--accent-pink)
-
-  p
-    margin .8rem 0
+  > span
     color var(--text-secondary)
-    font-size .95rem
+    background var(--accent-tint)
+    font-size .75rem
+    border-radius .6rem
+    padding .1rem .55rem
+    white-space nowrap
 
-.article-card__meta, .article-card__tags
-  display flex
-  flex-wrap wrap
-  gap .5rem .8rem
-  color var(--text-soft)
-  font-size .78rem
+.article-section
+  min-width 0
 
-.article-card__tags a
-  padding .1rem .5rem
-  border-radius .4rem
+.filter-empty, .empty-state
+  padding 2rem 1.5rem
+  border-radius var(--radius-md)
   background var(--surface-muted)
   color var(--text-secondary)
 
-.empty-state
-  padding 3rem 1.5rem
-  color var(--text-secondary)
-  text-align center
+.filter-empty button
+  margin-left .5rem
+  border 0
+  background transparent
+  color var(--accent-blue-strong)
+  text-decoration underline
+  cursor pointer
 
 .site-footer
   display flex
   flex-wrap wrap
   align-items center
-  justify-content space-between
-  gap .6rem 1.5rem
+  justify-content center
+  gap .5rem 1.5rem
   width calc(100% - 3rem)
   max-width var(--content-width)
-  margin 2.5rem auto 0
-  padding 1.4rem 0 2rem
-  border-top 1px solid var(--line-soft)
+  margin 2rem auto 0
+  padding 1.5rem 0 2rem
   color var(--text-soft)
   font-size .75rem
-
   p
     margin 0
 
 .page-shell
   width calc(100% - 3rem)
   max-width var(--content-width)
-  margin 3rem auto 0
+  margin 2rem auto 0
 
 .page-panel
-  padding clamp(1.25rem, 4vw, 3rem)
+  padding clamp(1.25rem, 3vw, 2.5rem)
 
 .prose
   max-width 68ch
   color var(--text-secondary)
   line-height 1.9
 
-@media (max-width: 60rem)
-  :root
-    --sidebar-width 14rem
+// Clip the glass layer independently so text, focus rings and menus stay sharp.
+@supports (backdrop-filter: blur(1px))
+  .site-nav, .side-card, .article-card, .page-panel, .section-heading
+    position relative
+    isolation isolate
+    background transparent
+    border-color var(--glass-border)
+    &::before
+      content ''
+      position absolute
+      inset 0
+      z-index -1
+      pointer-events none
+      border-radius inherit
+      overflow hidden
+      background var(--glass-sheen), var(--glass-surface)
+      backdrop-filter blur(var(--glass-blur)) saturate(1.12)
 
-  .site-nav
-    gap .6rem
+  .article-card:hover
+    border-color var(--accent-blue)
 
-  .site-nav__links
-    gap .1rem
-
-    a
-      padding .4rem .65rem
-
+@media (max-width: 75rem)
   .home-shell
-    gap 1rem
-
-  .profile-card__intro
-    flex-direction column
-    align-items flex-start
-
-  .hero
-    min-height 24rem
-
-  .hero--compact
-    min-height 0
-
+    grid-template-columns 13.5rem minmax(0, 1fr)
+    grid-template-areas 'sidebar content' 'utility content'
+  .utility-sidebar
+    margin-top 0
   .hero__content
-    margin-top 4rem
+    min-height 21rem
 
 @media (max-width: 47rem)
+  :root
+    --glass-blur 16px
+  .hero
+    padding-top .65rem
+    --hero-position 40% 32%
+    &::before
+      top 6rem
   .site-nav
     grid-template-columns 1fr auto
-    gap .2rem 1rem
-    width 100%
-    padding .6rem 1rem .35rem
-    border-radius 0
-    border-inline 0
-
+    width calc(100% - 1.5rem)
+    gap .15rem .5rem
+    padding .4rem .65rem
+    border-radius 1rem
   .site-nav__brand
     font-size 1rem
-
   .site-nav__links
-    grid-column 1 / -1
     grid-row 2
-    justify-content space-between
-    gap .1rem
-
+    grid-column 1 / -1
+    justify-content center
+    gap .4rem
     a
       flex 1
-      padding .35rem .4rem
-      font-size .875rem
-
+      min-height 2.25rem
+      padding .25rem .6rem
+      font-size .85rem
   .site-nav__theme
-    grid-column 2
     grid-row 1
-
-  .hero
-    min-height 0
-
-    &::before
-      top 7rem
-      background-position center, 15% 35%
-
-  .hero--compact
-    background none
-
+    grid-column 2
   .hero__content
-    width calc(100% - 2rem)
-    margin 0 auto
-    padding 3.5rem 0 4.5rem
-
+    width calc(100% - 2.5rem)
+    min-height 19rem
+    align-items flex-end
+    padding 6rem 0 3.75rem
+  .hero__copy
+    width 100%
     h1
-      max-width 100%
-      font-size clamp(1.5rem, 5.8vw, 2rem)
+      font-size 1.85rem
+    h1 .theme-light-only
+      font-size clamp(.8rem, 4.25vw, 1.15rem)
+      line-height 1.8
       letter-spacing .02em
-
+  .hero:not(.hero--home) .hero__content
+    min-height 12rem
+    padding 2rem 0 3rem
   .hero__subtitle
-    max-width 52%
-    margin-top .8rem
     font-size .8rem
-
+    margin-top .6rem
+  .hero--home .hero__copy
+    width 100%
+    padding .85rem 1rem
+    border-radius 1rem
+    background unquote('color-mix(in srgb, var(--page-bg) 76%, transparent)')
+    backdrop-filter blur(8px)
+    color var(--text-primary)
+  .hero--home .hero__content
+    width calc(100% - 2.5rem)
+    min-height 23rem
+  .hero__edge
+    height 2rem
   .home-shell
-    width calc(100% - 2rem)
+    width calc(100% - 1.5rem)
     grid-template-columns minmax(0, 1fr)
-    grid-template-areas 'content' 'sidebar'
-    margin -1rem auto 0
-    gap 1.5rem
-
-  .content-column
+    grid-template-areas 'content' 'sidebar' 'utility'
     gap 1rem
-
-  .sidebar
-    grid-template-columns repeat(2, minmax(0, 1fr))
-
-  .profile-card
-    grid-column 1 / -1
-
-  .profile-card__intro
-    flex-direction row
-    align-items center
-
-  .profile-card__status
-    margin-top .65rem
-
-  .article-card
-    padding 1.15rem 1.25rem
-
-    h3
-      font-size 1.15rem
-
-      &::before
-        left -1.25rem
-
-  .section-heading h2
-    font-size 1.15rem
-
+    margin-top .25rem
+  .home-shell--compact
+    margin-top 1rem
+  .home-shell--archive
+    grid-template-areas 'sidebar' 'content' 'utility'
+    .sidebar .profile-card, .sidebar .music-card
+      display none
+  .sidebar, .utility-sidebar
+    gap .8rem
+  .section-heading
+    padding .8rem 1rem
+    h2, h1
+      font-size 1.1rem
   .page-shell
-    width calc(100% - 2rem)
-    margin-top 1.5rem
-
+    width calc(100% - 1.5rem)
+    margin-top 1rem
   .site-footer
     width calc(100% - 2rem)
     flex-direction column
     text-align center
-
-@media (max-width: 30rem)
-  .sidebar
-    grid-template-columns minmax(0, 1fr)
 
 @media (prefers-reduced-motion: reduce)
   *, *::before, *::after

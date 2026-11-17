@@ -1,5 +1,7 @@
 ---
 import { siteConfig } from '@config/site';
+import { getImage } from 'astro:assets';
+import deniaHead from '@assets/denia-pixel-head-v1.png';
 import '@styles/fonts.css';
 import '@styles/global.styl';
 import '@styles/markdown.styl';
@@ -18,6 +20,9 @@ const {
 } = Astro.props;
 
 const pageTitle = title === siteConfig.name ? title : `${title} · ${siteConfig.name}`;
+const favicons = await Promise.all(
+  [16, 32].map(width => getImage({ src: deniaHead, width, height: width, format: 'png' })),
+);
 ---
 
 <!doctype html>
@@ -27,8 +32,9 @@ const pageTitle = title === siteConfig.name ? title : `${title} · ${siteConfig.
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
+    {favicons.map(icon => <link rel="icon" type="image/png" sizes={`${icon.attributes.width}x${icon.attributes.height}`} href={icon.src} />)}
     {(noindex || previewContent) && <meta name="robots" content="noindex, nofollow" />}
-    <meta name="theme-color" content="#f6f7ff" />
+    <meta name="theme-color" content="#fbf7fb" />
     <title>{pageTitle}</title>
     <script is:inline>
       (() => {
@@ -50,7 +56,7 @@ const pageTitle = title === siteConfig.name ? title : `${title} · ${siteConfig.
         document.documentElement.dataset.themePreference = preference;
         document
           .querySelector('meta[name="theme-color"]')
-          ?.setAttribute('content', theme === 'dark' ? '#10101c' : '#f6f7ff');
+          ?.setAttribute('content', theme === 'dark' ? '#080e1c' : '#fbf7fb');
       })();
     </script>
   </head>

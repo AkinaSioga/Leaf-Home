@@ -1,24 +1,54 @@
 ---
 import { Image } from 'astro:assets';
-import type { CollectionEntry } from 'astro:content';
 import { siteConfig } from '@config/site';
-import { personalConfig } from '@config/personal';
 import avatar from '@assets/avatar.jpg';
-import Now from '@components/widget/Now.astro';
-import Bookmarks from '@components/widget/Bookmarks.astro';
-import RightSideBar from './RightSideBar.astro';
-interface Props { posts: CollectionEntry<'posts'>[]; tagCounts: Map<string, number>; }
-const { posts, tagCounts } = Astro.props;
+import PostFilters from './PostFilters.astro';
+import MusicPlayer from '@components/widget/MusicPlayer.astro';
+interface Props {
+  categoryCounts: Map<string, number>;
+  tagCounts: Map<string, number>;
+  interactive?: boolean;
+  active?: string;
+}
+const { categoryCounts, tagCounts, interactive = false, active } = Astro.props;
 ---
-<aside class="sidebar" aria-label="个人与归档">
+<aside class="sidebar" aria-label="个人与分类">
   <section class="side-card profile-card">
-    <div class="profile-card__intro">
-      <Image class="profile-card__avatar" src={avatar} alt={`${siteConfig.author} 的头像`} width={88} height={88} />
-      <div><h2>{siteConfig.author}</h2><p>{siteConfig.description}</p></div>
-    </div>
-    <div class="profile-card__status"><span aria-hidden="true"></span>正在虚质空间漂流中……</div>
+    <Image class="profile-card__avatar" src={avatar} alt={`${siteConfig.author} 的头像`} width={240} height={240} />
+    <h2>{siteConfig.author}</h2>
+    <p>{siteConfig.description}</p>
+    <span class="profile-card__rule" aria-hidden="true"></span>
   </section>
-  <Now />
-  <RightSideBar posts={posts} tagCounts={tagCounts} />
-  {personalConfig.bookmarks.length > 0 && <Bookmarks />}
+  <PostFilters categoryCounts={categoryCounts} tagCounts={tagCounts} interactive={interactive} active={active} />
+  <MusicPlayer />
 </aside>
+<style lang="stylus">
+  .profile-card
+    padding .85rem .85rem 1rem
+    text-align center
+    h2
+      display block
+      margin .65rem 0 .15rem
+      font-size 1.15rem
+    p
+      margin 0
+      font-size .8rem
+  .profile-card__avatar
+    display block
+    width 100%
+    height auto
+    aspect-ratio 1
+    border-radius .8rem
+    object-fit cover
+  .profile-card__rule
+    display block
+    width 1.5rem
+    height .2rem
+    margin .6rem auto 0
+    border-radius 1rem
+    background var(--accent-pink)
+  @media (max-width: 47rem)
+    .profile-card__avatar
+      width 8rem
+      margin auto
+</style>

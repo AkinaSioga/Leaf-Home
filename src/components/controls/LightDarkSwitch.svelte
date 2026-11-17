@@ -26,7 +26,7 @@
     document.documentElement.dataset.theme = theme;
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute('content', theme === 'dark' ? '#10101c' : '#f6f7ff');
+      ?.setAttribute('content', theme === 'dark' ? '#080e1c' : '#fbf7fb');
   }
   
   function selectTheme(value: ThemePreference) {
@@ -170,6 +170,23 @@
     background var(--surface-raised)
     box-shadow var(--shadow-card)
     backdrop-filter blur(18px)
+
+  @supports (backdrop-filter: blur(1px))
+    .theme-panel
+      isolation isolate
+      background transparent
+      border-color var(--glass-border)
+      backdrop-filter none
+      &::before
+        content ''
+        position absolute
+        inset 0
+        z-index -1
+        pointer-events none
+        overflow hidden
+        border-radius inherit
+        background var(--glass-sheen), var(--glass-surface)
+        backdrop-filter blur(var(--glass-blur)) saturate(1.12)
 
   .theme-panel__item
     display flex

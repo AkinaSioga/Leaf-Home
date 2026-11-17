@@ -1,0 +1,116 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { postUrl, taxonomyUrl } from '@utils/content';
+interface Props { posts: CollectionEntry<'posts'>[]; title?: string; filterable?: boolean; }
+const { posts, title = '全部文章', filterable = false } = Astro.props;
+const years = new Map<number, CollectionEntry<'posts'>[]>();
+for (const post of posts) {
+  const year = post.data.publishedAt.getUTCFullYear();
+  if (!years.has(year)) years.set(year, []);
+  years.get(year)!.push(post);
+}
+---
+<section class="timeline-section" id="articles" aria-labelledby="article-heading">
+  <div class="section-heading"><h2 id="article-heading" data-post-title={filterable}>{title}</h2><span data-post-count={filterable} aria-live={filterable ? 'polite' : undefined}>{posts.length} 篇</span></div>
+  <div class="page-panel timeline">
+    {[...years].map(([year, entries]) => <section class="timeline__year" data-year-group aria-label={`${year} 年文章`}>
+      <h3>{year}<span data-year-count>{entries.length} 篇文章</span></h3>
+      <ol>
+        {entries.map(post => <li class="timeline__row" data-post-category={filterable ? post.data.category : undefined} data-post-tags={filterable ? JSON.stringify(post.data.tags) : undefined}>
+          <time datetime={post.data.publishedAt.toISOString()}>{post.data.publishedAt.toISOString().slice(5, 10)}</time>
+          <a class="timeline__category" href={taxonomyUrl('categories', post.data.category)} data-filter-category={filterable ? post.data.category : undefined}>{post.data.category}</a>
+          <a class="timeline__title" href={postUrl(post.id)}>{post.data.title}</a>
+        </li>)}
+      </ol>
+    </section>)}
+    {(filterable || posts.length === 0) && <p class="filter-empty" data-filter-empty hidden={posts.length > 0}>这里暂时没有文章。{filterable && <button type="button" data-clear-filter>清除筛选</button>}</p>}
+  </div>
+</section>
+<style lang="stylus">
+  .timeline
+    min-height 37rem
+    padding 1.75rem
+  .timeline__year + .timeline__year
+    margin-top 2.5rem
+  h3
+    display flex
+    align-items center
+    gap .85rem
+    margin 0 0 1.25rem
+    font-size 1.8rem
+    line-height 1.3
+    &::before
+      content ''
+      width 4px
+      height 1.6rem
+      border-radius 4px
+      background var(--accent-pink)
+    span
+      padding .15rem .65rem
+      border-radius .65rem
+      background var(--accent-tint)
+      color var(--text-secondary)
+      font-size .75rem
+      font-weight 500
+  ol
+    margin 0 0 0 .25rem
+    padding 0 0 0 1.4rem
+    border-left 2px dashed var(--line-soft)
+    list-style none
+  .timeline__row
+    position relative
+    display grid
+    grid-template-columns 3.25rem auto minmax(0, 1fr)
+    align-items center
+    gap .8rem
+    min-height 4.4rem
+    padding .8rem 0
+    &:not(:last-child)
+      border-bottom 1px solid var(--line-soft)
+    &::before
+      content ''
+      position absolute
+      top calc(50% - .25rem)
+      left -1.7rem
+      width .5rem
+      height .5rem
+      border-radius 50%
+      background var(--accent-cyan)
+      box-shadow 0 0 0 4px var(--surface-raised)
+  time
+    color var(--text-secondary)
+    font-size .8rem
+    font-variant-numeric tabular-nums
+  a
+    text-decoration none
+    &:hover
+      color var(--accent-blue-strong)
+  .timeline__category
+    padding .1rem .6rem
+    border-radius .6rem
+    color var(--accent-blue-strong)
+    background var(--accent-tint)
+    font-size .75rem
+  .timeline__title
+    font-weight 650
+    font-size 1rem
+    line-height 1.6
+  @media (max-width: 47rem)
+    .timeline
+      padding 1.2rem
+      min-height 22rem
+    h3
+      font-size 1.6rem
+    ol
+      padding-left 1rem
+    .timeline__row
+      grid-template-columns 3rem minmax(0, 1fr)
+      gap .35rem .6rem
+      &::before
+        left -1.3rem
+    .timeline__category
+      justify-self start
+    .timeline__title
+      grid-column 1 / -1
+      font-size .95rem
+</style>

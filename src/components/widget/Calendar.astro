@@ -5,9 +5,10 @@ import { postUrl } from '@utils/content';
 
 interface Props {
     posts: CollectionEntry<'posts'>[];
+    compact?: boolean;
 }
 
-const { posts } = Astro.props;
+const { posts, compact = false } = Astro.props;
 const postMeta = posts.map((post) => ({
     title: post.data.title,
     url: postUrl(post.id),
@@ -15,7 +16,7 @@ const postMeta = posts.map((post) => ({
 }));
 ---
 
-<div class="calendar">
+<div class:list={['calendar', { 'calendar--compact': compact }]}>
     <!-- 头部 -->
      <div class="calendar__header">
         <button id="calendar-prev" class="calendar__prev" type="button" aria-label="上个月">
@@ -235,6 +236,8 @@ const postMeta = posts.map((post) => ({
 </script>
 
 <style lang="stylus">
+    .calendar--compact .calendar__heatmap, .calendar--compact .calendar__posts
+        display none
     .calendar__header
         display flex
         align-items center

@@ -3,6 +3,8 @@ export type SiteConfig = {
   author: string;
   description: string;
   heroTitle: string;
+  lightHeroTitle: string;
+  lightHeroSubtitle: string;
   heroSubtitle: string;
   language: string;
   siteStartDate: string;

@@ -3,20 +3,28 @@ import { render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import Navbar from '@components/layout/Navbar.astro';
 import Footer from '@components/layout/Footer.astro';
+import SideBar from '@components/layout/SideBar.astro';
+import ShortNotes from '@components/widget/ShortNotes.astro';
+import { Icon } from 'astro-icon/components';
 import { getPosts, dated, taxonomyUrl } from '@utils/content';
+import { buildTaxonomyCounts } from '@utils/postStats';
 import { withBasePath } from '@utils/url';
 export async function getStaticPaths() {
   return (await getPosts()).map(post => ({ params: { id: post.id }, props: { post } }));
 }
 interface Props { post: CollectionEntry<'posts'>; }
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
+const posts = await getPosts();
+const { categoryCounts, tagCounts } = buildTaxonomyCounts(posts);
+const outline = headings.filter(heading => heading.depth === 2 || heading.depth === 3);
 ---
 <BaseLayout title={post.data.title} description={post.data.description}>
   <Navbar compact />
-  <main class="page-shell">
-    <a class="back-link" href={withBasePath('/#articles')}>← 返回文章</a>
-    <article class="page-panel post-page">
+  <main class="home-shell home-shell--compact reading-shell">
+    <div class="content-column">
+      <article class="page-panel post-page">
+      <a class="back-link" href={withBasePath('/posts/')}>← 返回文章</a>
       <header class="post-heading"><a href={taxonomyUrl('categories', post.data.category)}>{post.data.category}</a><h1>{post.data.title}</h1>
         <p class="post-meta"><time datetime={post.data.publishedAt.toISOString()}>{dated(post.data.publishedAt)}</time>{post.data.updatedAt && ` · 更新于 ${dated(post.data.updatedAt)}`}{post.data.draft && ' · 草稿'}</p>
         <p class="post-description">{post.data.description}</p>
@@ -24,6 +32,52 @@ const { Content } = await render(post);
       <div class="markdown-body post-body"><Content /></div>
       <nav class="post-tags" aria-label="文章标签">{post.data.tags.map(tag => <a href={taxonomyUrl('tags', tag)}>#{tag}</a>)}</nav>
     </article>
+    </div>
+    <SideBar categoryCounts={categoryCounts} tagCounts={tagCounts} active={post.data.category} />
+    <aside class="utility-sidebar reading-aside" aria-label="文章目录与日常">
+      {outline.length > 0 && <nav class="side-card post-outline" aria-label="文章目录">
+        <h2><Icon name="material-symbols:format-list-bulleted-rounded" aria-hidden="true" />目录</h2>
+        <ol>{outline.map(heading => <li class:list={{ 'post-outline__child': heading.depth === 3 }}><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ol>
+      </nav>}
+      <ShortNotes />
+    </aside>
   </main>
-  <Footer />
+  <Footer stats={{ posts: posts.length, categories: categoryCounts.size, tags: tagCounts.size }} />
 </BaseLayout>
+<style lang="stylus">
+  .post-page
+    width 100%
+    min-width 0
+    max-width none
+    padding clamp(1.25rem, 2.8vw, 2.5rem)
+  .back-link
+    margin-bottom .75rem
+    font-size .8rem
+  .post-heading h1
+    font-size clamp(1.6rem, 2.5vw, 2.3rem)
+  .post-outline
+    ol
+      list-style none
+      padding 0
+      margin 0
+    li
+      margin .5rem 0
+      font-size .78rem
+      line-height 1.65
+      overflow-wrap anywhere
+    a
+      color var(--text-secondary)
+      text-decoration none
+      &:hover
+        color var(--accent-blue-strong)
+    .post-outline__child
+      padding-left .75rem
+      border-left 2px solid var(--line-soft)
+  @media (min-width: 75.01rem)
+    .reading-aside
+      position sticky
+      top 1.25rem
+  @media (max-width: 47rem)
+    .reading-shell :global(.sidebar)
+      display none
+</style>

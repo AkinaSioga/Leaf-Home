@@ -5,22 +5,26 @@ import { withBasePath } from '@utils/url';
 interface Props {
   categoryCounts: Map<string, number>;
   active?: string;
+  filterable?: boolean;
+  allHref?: string;
 }
 
-const { categoryCounts, active } = Astro.props;
+const { categoryCounts, active, filterable = false, allHref = withBasePath('/posts/') } = Astro.props;
 
 const categories = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1]);
+const total = categories.reduce((sum, [, count]) => sum + count, 0);
 ---
 
 <nav class="category-bar" aria-label="文章分类">
-    <a class:list={['category-pill', { 'category-pill--home': !active }]} href={withBasePath('/#articles')} aria-current={!active ? 'page' : undefined}>
-      全部
+    <a class:list={['category-pill', { 'category-pill--home': !active }]} href={allHref} data-filter-category={filterable ? '' : undefined} aria-current={!active ? 'page' : undefined}>
+      全部文章
+      <span class="category-pill__count">{total}</span>
     </a>
 
   <div class="category-bar__scroll">
     {
       categories.map(([name, count]) => (
-        <a class:list={['category-pill', { 'category-pill--home': active === name }]} href={taxonomyUrl('categories', name)} aria-current={active === name ? 'page' : undefined}>
+        <a class:list={['category-pill', { 'category-pill--home': active === name }]} href={taxonomyUrl('categories', name)} data-filter-category={filterable ? name : undefined} aria-current={active === name ? 'page' : undefined}>
           {name}
           <span class="category-pill__count">{count}</span>
         </a>
@@ -31,9 +35,8 @@ const categories = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1]);
 
 <style lang="stylus">
   .category-bar
-    display flex
-    align-items center
-    gap .5rem
+    display grid
+    gap .25rem
     min-width 0
     padding 0
 
@@ -41,11 +44,11 @@ const categories = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1]);
     display inline-flex
     flex-shrink 0
     align-items center
-    justify-content center
+    justify-content space-between
     gap .4rem
-    min-height 2.75rem
-    padding .35rem .85rem
-    border-radius .75rem
+    min-height 2.35rem
+    padding .35rem .65rem
+    border-radius .7rem
     color var(--text-secondary)
     background transparent
     font-size .86rem
@@ -60,22 +63,29 @@ const categories = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1]);
 
   .category-pill--home
     color var(--text-primary)
-    background var(--surface-muted)
-    box-shadow inset 0 -2px 0 var(--accent-pink)
+    background var(--accent-tint)
+    color var(--accent-blue-strong)
 
   .category-pill__count
+    display inline-flex
+    align-items center
+    justify-content center
+    min-width 1.4rem
+    min-height 1.4rem
+    padding .1rem .35rem
+    border-radius .45rem
     color var(--text-soft)
-    font-size .68rem
+    background var(--surface-muted)
+    font-size .72rem
     font-weight 700
+    font-variant-numeric tabular-nums
+
+  .category-pill--home .category-pill__count
+    color var(--accent-pink-strong)
+    background var(--surface-raised)
 
   .category-bar__scroll
-    display flex
-    flex 1
+    display grid
     min-width 0
-    gap .5rem
-    overflow-x auto
-    scrollbar-width none
-
-    &::-webkit-scrollbar
-      display none
+    gap .25rem
 </style>

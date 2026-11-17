@@ -7,6 +7,13 @@ pnpm 版本取自 `package.json`。构建前执行类型检查和图标一致性
 正式地址为 `https://akinasuki.love`，`SITE_URL` 使用该地址，`BASE_PATH=/`。
 GitHub Pages 的 Source 设置为 GitHub Actions，Custom domain 为 `akinasuki.love`。
 
+## 2026-11-17 主题改版回退点
+
+此次改版发布前，线上成功部署的提交为 `bc2527b90dbd9ed9eaaae8329f1729f344f908d9`，
+对应 Actions run `44055676550`。日常版本回退不需要切换域名或恢复旧 Hugo 仓库：
+使用 `git revert <本次改版提交>` 生成撤回提交，推送 `main` 后等待同一 Pages 工作流完成，
+再检查正式首页与文章链接；不要 reset 或强推分支。
+
 ## 2026-09-19 切换前记录
 
 - 旧仓库：`AkinaSioga/Game-Blog`，保留源码和历史，不删除仓库。

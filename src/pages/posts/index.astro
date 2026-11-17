@@ -1,0 +1,27 @@
+---
+import { getPosts } from '@utils/content';
+import { buildTaxonomyCounts } from '@utils/postStats';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Navbar from '@components/layout/Navbar.astro';
+import ArticleTimeline from '@components/layout/ArticleTimeline.astro';
+import RightSideBar from '@components/layout/RightSideBar.astro';
+import SideBar from '@components/layout/SideBar.astro';
+import Footer from '@components/layout/Footer.astro';
+
+const posts = await getPosts();
+const { categoryCounts, tagCounts } = buildTaxonomyCounts(posts);
+---
+
+<BaseLayout title="文章" description="一些技术实践，也记下一些日常。按分类和标签，翻阅这里的文章。">
+  <Navbar title="文章" subtitle="一些技术实践，也记下一些日常。" />
+
+  <main class="home-shell home-shell--archive" data-post-filter-root>
+    <div class="content-column">
+      <ArticleTimeline posts={posts} filterable />
+    </div>
+    <SideBar categoryCounts={categoryCounts} tagCounts={tagCounts} interactive />
+    <RightSideBar posts={posts} />
+  </main>
+
+  <Footer stats={{ posts: posts.length, categories: categoryCounts.size, tags: tagCounts.size }} />
+</BaseLayout>
