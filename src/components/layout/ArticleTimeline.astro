@@ -10,107 +10,162 @@ for (const post of posts) {
   years.get(year)!.push(post);
 }
 ---
-<section class="timeline-section" id="articles" aria-labelledby="article-heading">
-  <div class="section-heading"><h2 id="article-heading" data-post-title={filterable}>{title}</h2><span data-post-count={filterable} aria-live={filterable ? 'polite' : undefined}>{posts.length} 篇</span></div>
-  <div class="page-panel timeline">
+<section class="page-panel timeline" id="articles" aria-labelledby="article-heading">
+  <header class="timeline__heading"><h2 id="article-heading" data-post-title={filterable}>{title}</h2><span data-post-count={filterable} aria-live={filterable ? 'polite' : undefined}>{posts.length} 篇</span></header>
     {[...years].map(([year, entries]) => <section class="timeline__year" data-year-group aria-label={`${year} 年文章`}>
-      <h3>{year}<span data-year-count>{entries.length} 篇文章</span></h3>
+      <h3><span class="timeline__year-number">{year}</span><span class="timeline__year-count" data-year-count>{entries.length} 篇文章</span></h3>
       <ol>
         {entries.map(post => <li class="timeline__row" data-post-category={filterable ? post.data.category : undefined} data-post-tags={filterable ? JSON.stringify(post.data.tags) : undefined}>
           <time datetime={post.data.publishedAt.toISOString()}>{post.data.publishedAt.toISOString().slice(5, 10)}</time>
-          <a class="timeline__category" href={taxonomyUrl('categories', post.data.category)} data-filter-category={filterable ? post.data.category : undefined}>{post.data.category}</a>
-          <a class="timeline__title" href={postUrl(post.id)}>{post.data.title}</a>
+          <div class="timeline__entry">
+            <a class="timeline__category" href={taxonomyUrl('categories', post.data.category)} data-filter-category={filterable ? post.data.category : undefined}>{post.data.category}</a>
+            <a class="timeline__title" href={postUrl(post.id)} title={post.data.title}>{post.data.title}</a>
+            <span class="timeline__tags">{post.data.tags.map(tag => <a href={taxonomyUrl('tags', tag)} data-filter-tag={filterable ? tag : undefined}>#{tag}</a>)}</span>
+          </div>
         </li>)}
       </ol>
     </section>)}
     {(filterable || posts.length === 0) && <p class="filter-empty" data-filter-empty hidden={posts.length > 0}>这里暂时没有文章。{filterable && <button type="button" data-clear-filter>清除筛选</button>}</p>}
-  </div>
 </section>
 <style lang="stylus">
   .timeline
-    min-height 37rem
-    padding 1.75rem
-  .timeline__year + .timeline__year
-    margin-top 2.5rem
-  h3
+    --timeline-date 4.75rem
+    --timeline-gutter 4rem
+    --timeline-axis calc(var(--timeline-date) + var(--timeline-gutter) / 2)
+    padding 1.4rem 2rem 1.5rem
+  .timeline__heading
     display flex
+    justify-content space-between
     align-items center
-    gap .85rem
-    margin 0 0 1.25rem
-    font-size 1.8rem
-    line-height 1.3
-    &::before
-      content ''
-      width 4px
-      height 1.6rem
-      border-radius 4px
-      background var(--accent-pink)
-    span
-      padding .15rem .65rem
-      border-radius .65rem
-      background var(--accent-tint)
-      color var(--text-secondary)
+    gap 1rem
+    margin-bottom 1.75rem
+    h2
+      margin 0
+      color var(--accent-blue-strong)
+      font-size .9rem
+      font-weight 600
+    > span
+      color var(--text-soft)
       font-size .75rem
-      font-weight 500
-  ol
-    margin 0 0 0 .25rem
-    padding 0 0 0 1.4rem
-    border-left 2px dashed var(--line-soft)
-    list-style none
-  .timeline__row
+      white-space nowrap
+  .timeline__year + .timeline__year
+    margin-top 1.5rem
+  h3
     position relative
     display grid
-    grid-template-columns 3.25rem auto minmax(0, 1fr)
+    grid-template-columns var(--timeline-date) var(--timeline-gutter) minmax(0, 1fr)
     align-items center
-    gap .8rem
-    min-height 4.4rem
-    padding .8rem 0
-    &:not(:last-child)
-      border-bottom 1px solid var(--line-soft)
+    margin 0 0 .5rem
+    min-height 2rem
+    line-height 1.4
     &::before
       content ''
       position absolute
-      top calc(50% - .25rem)
-      left -1.7rem
-      width .5rem
-      height .5rem
+      box-sizing border-box
+      left calc(var(--timeline-axis) - .45rem)
+      width .9rem
+      height .9rem
+      border 3px solid var(--accent-cyan)
+      border-radius 50%
+  .timeline__year-number
+    text-align right
+    font-size 1.5rem
+    font-weight 650
+  .timeline__year-count
+    grid-column 3
+    color var(--text-soft)
+    font-size .9rem
+    font-weight 500
+  ol
+    position relative
+    margin 0
+    padding 0
+    list-style none
+    &::before
+      content ''
+      position absolute
+      top -.6rem
+      bottom 1.25rem
+      left calc(var(--timeline-axis) - 1px)
+      border-left 2px dashed var(--line-soft)
+  .timeline__row
+    position relative
+    display grid
+    grid-template-columns var(--timeline-date) var(--timeline-gutter) minmax(0, 1fr)
+    align-items center
+    min-height 2.5rem
+    padding .4rem 0
+    &::before
+      content ''
+      position absolute
+      top calc(50% - 2px)
+      left calc(var(--timeline-axis) - 2px)
+      width 4px
+      height 4px
       border-radius 50%
       background var(--accent-cyan)
-      box-shadow 0 0 0 4px var(--surface-raised)
+      box-shadow 0 0 0 3px var(--surface)
+      opacity .65
   time
-    color var(--text-secondary)
+    color var(--text-soft)
     font-size .8rem
     font-variant-numeric tabular-nums
+    text-align right
+  .timeline__entry
+    display flex
+    grid-column 3
+    align-items center
+    gap .6rem
+    min-width 0
   a
     text-decoration none
     &:hover
       color var(--accent-blue-strong)
   .timeline__category
-    padding .1rem .6rem
-    border-radius .6rem
+    flex-shrink 0
+    padding 0 .4rem
+    border-radius .25rem
     color var(--accent-blue-strong)
     background var(--accent-tint)
     font-size .75rem
   .timeline__title
-    font-weight 650
-    font-size 1rem
+    min-width 0
+    overflow hidden
+    text-overflow ellipsis
+    white-space nowrap
+    font-weight 600
+    font-size .9rem
     line-height 1.6
+  .timeline__tags
+    flex-shrink 0
+    max-width 26%
+    margin-left auto
+    overflow hidden
+    color var(--text-soft)
+    font-size .75rem
+    text-overflow ellipsis
+    white-space nowrap
+    opacity .7
+    a + a
+      margin-left .35rem
+  @media (min-width: 47.01rem) and (max-width: 62rem)
+    .timeline__tags
+      display none
   @media (max-width: 47rem)
     .timeline
-      padding 1.2rem
-      min-height 22rem
-    h3
-      font-size 1.6rem
-    ol
-      padding-left 1rem
-    .timeline__row
-      grid-template-columns 3rem minmax(0, 1fr)
-      gap .35rem .6rem
-      &::before
-        left -1.3rem
+      --timeline-date 2.75rem
+      --timeline-gutter 1.75rem
+      padding 1rem
+    .timeline__heading
+      margin-bottom 1.25rem
+    .timeline__year-number
+      font-size 1.2rem
+    .timeline__entry
+      gap .4rem
     .timeline__category
-      justify-self start
+      font-size .65rem
     .timeline__title
-      grid-column 1 / -1
-      font-size .95rem
+      font-size .85rem
+    .timeline__tags
+      display none
 </style>

@@ -169,6 +169,47 @@ button, input, textarea, select, code, pre, kbd, samp
 .hero--home .hero__copy
   width var(--home-hero-copy-width)
 
+// Keep the copy as selectable text; pearly highlights give the rounded glyphs a bubble sheen.
+.hero--home .hero__copy h1
+  position relative
+  isolation isolate
+  width fit-content
+  max-width 100%
+  text-shadow none
+  &::before, &::after
+    content ''
+    position absolute
+    z-index -1
+    width .4em
+    height .4em
+    pointer-events none
+    border 1px solid rgba(226, 244, 255, .8)
+    border-radius 50%
+    background radial-gradient(circle at 30% 25%, rgba(255, 255, 255, .95) 0 6%, rgba(214, 244, 255, .32) 16%, transparent 52%, rgba(180, 164, 241, .45) 82%, rgba(249, 210, 243, .7))
+    box-shadow inset -1px -1px 3px rgba(194, 189, 247, .5), 0 0 8px var(--bubble-glow)
+  &::before
+    top -.3em
+    left 2.8em
+  &::after
+    right .15em
+    bottom -.15em
+    width .25em
+    height .25em
+
+.hero__bubble-text
+  width fit-content
+  max-width 100%
+  color var(--hero-text)
+  filter drop-shadow(0 1px 0 var(--bubble-rim)) drop-shadow(0 3px 5px var(--bubble-shadow)) drop-shadow(0 0 9px var(--bubble-glow))
+  @supports (background-clip: text)
+    background-image var(--bubble-fill)
+    background-clip text
+    -webkit-background-clip text
+    color transparent
+    -webkit-text-fill-color transparent
+    -webkit-text-stroke .55px var(--bubble-stroke)
+    paint-order stroke fill
+
 .hero__edge
   position absolute
   bottom -1px

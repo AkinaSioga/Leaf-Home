@@ -52,7 +52,7 @@ const homeHref = withBasePath('/');
 
   {!compact && <div class="hero__content">
     <div class="hero__copy">
-      <h1>{isHome ? <><span class="theme-light-only">{lightLines.map(line => <span>{line}</span>)}</span><span class="theme-dark-only">{title}</span></> : title}</h1>
+      <h1>{isHome ? <><span class="theme-light-only">{lightLines.map(line => <span class="hero__bubble-text">{line}</span>)}</span><span class="theme-dark-only hero__bubble-text">{title}</span></> : title}</h1>
       <p class="hero__subtitle">{isHome ? <><span class="theme-light-only">{siteConfig.lightHeroSubtitle}</span><span class="theme-dark-only">{subtitle}</span></> : subtitle}</p>
     </div>
   </div>}
