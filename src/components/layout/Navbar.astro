@@ -52,9 +52,102 @@ const homeHref = withBasePath('/');
 
   {!compact && <div class="hero__content">
     <div class="hero__copy">
-      <h1>{isHome ? <><span class="theme-light-only">{lightLines.map(line => <span class="hero__bubble-text">{line}</span>)}</span><span class="theme-dark-only hero__bubble-text">{title}</span></> : title}</h1>
-      <p class="hero__subtitle">{isHome ? <><span class="theme-light-only">{siteConfig.lightHeroSubtitle}</span><span class="theme-dark-only">{subtitle}</span></> : subtitle}</p>
+      <div class="hero__quote">
+        <div class="hero__words">
+          <h1>{isHome ? <><span class="theme-light-only">{lightLines.map(line => <span>{line}</span>)}</span><span class="theme-dark-only">{title}</span></> : title}</h1>
+          <p class="hero__subtitle">{isHome ? <><span class="theme-light-only">{siteConfig.lightHeroSubtitle}</span><span class="theme-dark-only">{subtitle}</span></> : subtitle}</p>
+        </div>
+        {isHome && <span class="hero__bubbles" aria-hidden="true">{[0, 1, 2, 3, 4].map(() => <span />)}</span>}
+      </div>
     </div>
   </div>}
   {!compact && <svg class="hero__edge" viewBox="0 0 1440 50" preserveAspectRatio="none" aria-hidden="true"><path d="M0 22C190 0 300 50 530 29S820 9 1050 29S1290 5 1440 20V50H0Z" fill="currentColor" /></svg>}
 </header>
+
+<style lang="stylus">
+  .hero--home .hero__quote
+    position relative
+    width fit-content
+    max-width 100%
+
+  // The whole quote stays readable between gentle bubble-like entrances and exits.
+  .hero--home .hero__words
+    transform-origin center
+    animation hero-quote-float 11s ease-in-out infinite
+
+  .hero__bubbles
+    position absolute
+    inset 0
+    pointer-events none
+    > span
+      --bubble-drift 6px
+      position absolute
+      left 6%
+      top 65%
+      width .65rem
+      height .65rem
+      border 1px solid currentColor
+      border-radius 50%
+      background radial-gradient(circle at 30% 25%, rgba(255, 255, 255, .8) 0 6%, transparent 22%)
+      box-shadow inset -1px -1px 2px rgba(255, 255, 255, .3)
+      opacity 0
+      animation hero-quote-bubble 11s ease-out infinite
+      &:nth-child(2)
+        --bubble-drift -8px
+        left 28%
+        top 8%
+        width .4rem
+        height .4rem
+        animation-delay .35s
+      &:nth-child(3)
+        left 55%
+        top 88%
+        width .85rem
+        height .85rem
+        animation-delay .7s
+      &:nth-child(4)
+        --bubble-drift -5px
+        left 78%
+        top 32%
+        width .45rem
+        height .45rem
+        animation-delay .2s
+      &:nth-child(5)
+        left 94%
+        top 70%
+        animation-delay .5s
+
+  @keyframes hero-quote-float
+    0%
+      opacity 0
+      transform translateY(12px) scale(.985)
+      filter blur(1.5px)
+    16%
+      opacity 1
+      transform translateY(0) scale(1)
+      filter blur(0)
+    74%
+      opacity 1
+      transform translateY(-2px) scale(1)
+      filter blur(0)
+    96%, 100%
+      opacity 0
+      transform translateY(-16px) scale(1.012)
+      filter blur(2px)
+
+  @keyframes hero-quote-bubble
+    0%, 70%
+      opacity 0
+      transform translate(0, 10px) scale(.55)
+    10%, 78%
+      opacity .45
+    30%, 96%, 100%
+      opacity 0
+      transform translate(var(--bubble-drift), -30px) scale(1.15)
+
+  @media (prefers-reduced-motion: reduce)
+    .hero--home .hero__words
+      animation none
+    .hero__bubbles
+      display none
+</style>
