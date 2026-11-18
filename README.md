@@ -47,7 +47,9 @@ Astro Blog
 
 导航栏的两条链条挂着访客牌，下方的小牌按设备当地时间显示 24 小时时钟。正式域名的页面共用今日与累计独立访客数，按服务端日期换日。统计从接入时起累计，同一 IP 当天刷新或切换文章只计一个今日访客。[不蒜子统计口径](https://www.busuanzi.cc/doc.php)
 
-计数请求只提交博客根地址，使用浏览器直接请求 JSON 的方式读取两个 UV 字段。预览环境跳过计数，服务暂不可用时显示「—」，时钟独立运行。组件位于 `src/components/widget/VisitorPendant.astro`，请求和时钟逻辑位于 `src/scripts/visitor-pendant.ts`。
+文章正文日期旁的眼睛显示本篇累计阅读次数（PV）。打开或刷新正文时，同一个请求读取本篇阅读量和站点访客数。文章使用由内容 ID 生成的固定统计标识，筛选参数、标题和来源页不会随请求发送。首页、归档和跨日刷新站点统计时使用博客根地址。
+
+预览环境跳过计数，服务暂不可用时显示「—」，时钟独立运行。组件位于 `src/components/widget/VisitorPendant.astro`，计数请求和时钟逻辑位于 `src/scripts/visitor-pendant.ts`。
 
 编辑 `src/config/personal.ts` 即可更新首页内容，修改后重新构建：
 
