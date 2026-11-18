@@ -18,9 +18,9 @@ for (const post of posts) {
         {entries.map(post => <li class="timeline__row" data-post-category={filterable ? post.data.category : undefined} data-post-tags={filterable ? JSON.stringify(post.data.tags) : undefined}>
           <time datetime={post.data.publishedAt.toISOString()}>{post.data.publishedAt.toISOString().slice(5, 10)}</time>
           <div class="timeline__entry">
-            <a class="timeline__category" href={taxonomyUrl('categories', post.data.category)} data-filter-category={filterable ? post.data.category : undefined}>{post.data.category}</a>
+            <a class="timeline__category" href={taxonomyUrl('categories', post.data.category)} data-filter-category={post.data.category}>{post.data.category}</a>
             <a class="timeline__title" href={postUrl(post.id)} title={post.data.title}>{post.data.title}</a>
-            <span class="timeline__tags">{post.data.tags.map(tag => <a href={taxonomyUrl('tags', tag)} data-filter-tag={filterable ? tag : undefined}>#{tag}</a>)}</span>
+            <span class="timeline__tags">{post.data.tags.map(tag => <a href={taxonomyUrl('tags', tag)} data-filter-tag={tag}>#{tag}</a>)}</span>
           </div>
         </li>)}
       </ol>
@@ -165,6 +165,11 @@ for (const post of posts) {
     .timeline__category
       font-size .65rem
     .timeline__title
+      display -webkit-box
+      -webkit-box-orient vertical
+      -webkit-line-clamp 2
+      white-space normal
+      overflow-wrap anywhere
       font-size .85rem
     .timeline__tags
       display none

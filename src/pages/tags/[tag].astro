@@ -11,4 +11,4 @@ export async function getStaticPaths() {
 interface Props { tag: string; posts: CollectionEntry<'posts'>[]; allPosts: CollectionEntry<'posts'>[]; }
 const { tag, posts, allPosts } = Astro.props;
 ---
-<ArchiveLayout title={'#' + tag} posts={posts} allPosts={allPosts} />
+<ArchiveLayout title={'#' + tag} tag={tag} posts={posts} allPosts={allPosts} />

@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 import svelte from '@astrojs/svelte';
 import icon from 'astro-icon';
 import { fileURLToPath } from 'node:url';
+import { articleCodeBlocks } from './scripts/article-code-blocks.mjs';
 
 const site = process.env.SITE_URL ?? 'https://akinasuki.love';
 const base = process.env.BASE_PATH ?? '/';
@@ -13,7 +14,7 @@ export default defineConfig({
   base,
   devToolbar: { enabled: false },
   markdown: {
-    shikiConfig: { theme: 'github-dark-default' },
+    shikiConfig: { theme: 'github-dark-default', transformers: [articleCodeBlocks] },
   },
   integrations: [icon(), svelte()],
   vite: {

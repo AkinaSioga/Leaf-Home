@@ -24,13 +24,13 @@ const outline = headings.filter(heading => heading.depth === 2 || heading.depth 
   <main class="home-shell home-shell--compact reading-shell">
     <div class="content-column">
       <article class="page-panel post-page">
-      <a class="back-link" href={withBasePath('/posts/')}>← 返回文章</a>
-      <header class="post-heading"><a href={taxonomyUrl('categories', post.data.category)}>{post.data.category}</a><h1>{post.data.title}</h1>
+      <a class="back-link" data-return-to-archive href={withBasePath('/posts/')}>← 返回文章</a>
+      <header class="post-heading"><a href={taxonomyUrl('categories', post.data.category)} data-filter-category={post.data.category}>{post.data.category}</a><h1>{post.data.title}</h1>
         <p class="post-meta"><time datetime={post.data.publishedAt.toISOString()}>{dated(post.data.publishedAt)}</time>{post.data.updatedAt && ` · 更新于 ${dated(post.data.updatedAt)}`}{post.data.draft && ' · 草稿'}</p>
         <p class="post-description">{post.data.description}</p>
       </header>
       <div class="markdown-body post-body"><Content /></div>
-      <nav class="post-tags" aria-label="文章标签">{post.data.tags.map(tag => <a href={taxonomyUrl('tags', tag)}>#{tag}</a>)}</nav>
+      <nav class="post-tags" aria-label="文章标签">{post.data.tags.map(tag => <a href={taxonomyUrl('tags', tag)} data-filter-tag={tag}>#{tag}</a>)}</nav>
     </article>
     </div>
     <SideBar categoryCounts={categoryCounts} tagCounts={tagCounts} active={post.data.category} />
@@ -44,6 +44,7 @@ const outline = headings.filter(heading => heading.depth === 2 || heading.depth 
   </main>
   <Footer stats={{ posts: posts.length, categories: categoryCounts.size, tags: tagCounts.size }} />
 </BaseLayout>
+<script src="../../scripts/copy-code.ts"></script>
 <style lang="stylus">
   .post-page
     width 100%

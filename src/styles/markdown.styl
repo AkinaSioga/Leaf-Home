@@ -39,6 +39,45 @@
     border-radius .25rem
     background var(--surface-muted)
     font-size .9em
+  .code-block
+    position relative
+    display grid
+    min-width 0
+    margin 1.2em 0
+    pre
+      margin 0
+  .code-block > pre
+    grid-row 2
+  .code-fold
+    min-width 0
+    border 1px solid var(--line-soft)
+    border-radius .65rem
+    background var(--surface-muted)
+    summary
+      padding .65rem 6.5rem .65rem .9rem
+      min-height 2.65rem
+      color var(--text-secondary)
+      cursor pointer
+      font-size .85rem
+    pre
+      border-top-left-radius 0
+      border-top-right-radius 0
+  .code-copy
+    grid-row 1
+    justify-self end
+    margin .25rem
+    padding .3rem .65rem
+    min-height 2rem
+    border 1px solid var(--line-soft)
+    border-radius .5rem
+    background var(--surface-raised)
+    color var(--accent-blue-strong)
+    font-size .78rem
+    cursor pointer
+  .code-fold + .code-copy
+    position absolute
+    top .06rem
+    right .15rem
   table
     display block
     max-width 100%
@@ -65,16 +104,12 @@
   font-size .75rem
   line-height 1.6
 
-.article-card h3 a, .article-card__meta a, .article-card__tags a
+.article-card h3 a
   text-decoration none
   &:hover
     color var(--accent-blue-strong)
     text-decoration underline
     text-underline-offset .2em
-
-.article-card__tags a
-  color var(--text-secondary)
-  font-size .75rem
 
 .back-link
   display inline-flex

@@ -3,16 +3,20 @@
 Install fonttools[woff] separately, then run with the directory containing
 the upstream LXGW975YuanSC-500W.ttf and LXGW975YuanSC-700W.ttf files.
 """
+import argparse
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-import sys
 
 from fontTools import subset
 from fontTools.ttLib import TTFont
 
 ROOT = Path(__file__).resolve().parents[1]
 DEST = ROOT / 'src/assets/fonts/975yuan'
-SOURCE = Path(sys.argv[1])
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('source', type=Path)
+parser.add_argument('--reuse-unchanged', action='store_true',
+                    help='Reuse subsets with the same character map when refreshing the same upstream fonts.')
+args = parser.parse_args()
 
 
 def unicode_ranges(points):
@@ -30,8 +34,25 @@ def unicode_ranges(points):
     return ', '.join(ranges)
 
 
+def write_subset(source, target, points):
+    if args.reuse_unchanged and target.is_file():
+        with TTFont(target, lazy=True) as existing:
+            if points == existing.getBestCmap().keys():
+                return
+    with TTFont(source, recalcTimestamp=False) as font:
+        options = subset.Options()
+        options.name_IDs = ['*']
+        options.name_legacy = True
+        options.name_languages = ['*']
+        subsetter = subset.Subsetter(options=options)
+        subsetter.populate(unicodes=points)
+        subsetter.subset(font)
+        font.flavor = 'woff2'
+        font.save(target)
+
+
 def prepare(weight):
-    source = SOURCE / f'LXGW975YuanSC-{weight}W.ttf'
+    source = args.source / f'LXGW975YuanSC-{weight}W.ttf'
     with TTFont(source) as font:
         supported = set(font.getBestCmap())
     # A small shared file covers today's text. Remaining glyphs stay available
@@ -44,18 +65,8 @@ def prepare(weight):
     ]
     faces = []
     for name, points in groups:
-        font = TTFont(source)
-        options = subset.Options()
-        options.name_IDs = ['*']
-        options.name_legacy = True
-        options.name_languages = ['*']
-        subsetter = subset.Subsetter(options=options)
-        subsetter.populate(unicodes=points)
-        subsetter.subset(font)
-        font.flavor = 'woff2'
         filename = f'975yuan-{weight}-{name}.woff2'
-        font.save(DEST / filename)
-        font.close()
+        write_subset(source, DEST / filename, points)
         faces.append(
             "@font-face {\n  font-family: 'LXGW 975 Yuan';\n"
             f"  src: url('../assets/fonts/975yuan/{filename}') format('woff2');\n"
@@ -69,6 +80,7 @@ def prepare(weight):
 
 
 common = set(range(0x20, 0x100))
+common.add(0x2026)  # CSS ellipsis and line-clamp can render this without it appearing in the source.
 for path in (ROOT / 'src').rglob('*'):
     if path.suffix in {'.md', '.astro', '.svelte', '.ts'}:
         common.update(ord(char) for char in path.read_text(encoding='utf-8'))

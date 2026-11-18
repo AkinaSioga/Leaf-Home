@@ -6,6 +6,8 @@
 
 当前站内文字放在 `core` 文件，其余字符按 Unicode 区间拆分，通过 `unicode-range` 按需加载。保留官方字体完整字符覆盖，新增文章无需重新生成字体。生成的 CSS 在 `src/styles/fonts.css`；请通过脚本更新，勿手动改动字符范围。
 
+首页新增文案或一批文章后，可用同一版本的 TTF 执行 `python scripts/prepare-fonts.py <TTF目录> --reuse-unchanged`，把新标题、摘要和界面用字收进两个字重的核心包。这个选项保留字集相同的旧分片，访客可以继续使用已有缓存。更换源字体或子集化参数时运行完整生成。
+
 按随附 [OFL.txt](../../../../public/fonts/975yuan/OFL.txt) 的 SIL Open Font License 1.1 及网页格式转换附加许可使用，字体保留原版权信息。许可文件随网站一起发布至 `fonts/975yuan/OFL.txt`。本目录字体仅供网页渲染。
 
 转换环境：Python 3、fontTools 4.68.0、Brotli 1.2.1。复现：在单独的 Python 环境安装 `fonttools[woff]`，将上述固定版本的官方 TTF 放入一个目录，然后执行 `python scripts/prepare-fonts.py <TTF目录>`。本次转换工具临时安装在忽略目录 `outputs/font-tools`，不加入网站依赖，也不参与常规构建。

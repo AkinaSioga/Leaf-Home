@@ -4,8 +4,8 @@ import { Icon } from 'astro-icon/components';
 import { taxonomyUrl } from '@utils/content';
 import { withBasePath } from '@utils/url';
 
-interface Props { categoryCounts: Map<string, number>; tagCounts: Map<string, number>; interactive?: boolean; active?: string; }
-const { categoryCounts, tagCounts, interactive = false, active } = Astro.props;
+interface Props { categoryCounts: Map<string, number>; tagCounts: Map<string, number>; interactive?: boolean; active?: string; activeTag?: string; }
+const { categoryCounts, tagCounts, interactive = false, active, activeTag = '' } = Astro.props;
 const tags = [...tagCounts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 const total = [...categoryCounts.values()].reduce((sum, count) => sum + count, 0);
 const allHref = interactive ? `${Astro.url.pathname}#articles` : withBasePath('/posts/');
@@ -17,11 +17,19 @@ const allHref = interactive ? `${Astro.url.pathname}#articles` : withBasePath('/
     <CategoryBar categoryCounts={categoryCounts} allHref={allHref} active={active} filterable />
   </section>
   <nav class="side-card tag-filter" aria-label="按标签筛选">
-    <h2><Icon name="material-symbols:label-outline-rounded" aria-hidden="true" /><span data-tag-label>标签</span></h2>
-    <div class="tag-filter__options">
-      <a href={allHref} data-filter-tag="" aria-current="true">全部标签<span data-tag-count>{total}</span></a>
-      {tags.map(([tag, count]) => <a href={taxonomyUrl('tags', tag)} data-filter-tag={tag}>#{tag}<span data-tag-count>{count}</span></a>)}
-    </div>
+    <details data-tag-disclosure>
+      <summary>
+        <h2><Icon name="material-symbols:label-outline-rounded" aria-hidden="true" />
+          <span><span data-tag-label>标签</span><span class="tag-filter__mobile-label">筛选</span></span>
+          <span class="tag-filter__selection" data-tag-selection>{activeTag ? `#${activeTag} · ${tagCounts.get(activeTag)} 篇` : `${total} 篇`}</span>
+          <span class="tag-filter__chevron" aria-hidden="true"></span>
+        </h2>
+      </summary>
+      <div class="tag-filter__options">
+        <a href={allHref} data-filter-tag="" aria-current={activeTag ? undefined : 'true'}>全部标签<span data-tag-count>{total}</span></a>
+        {tags.map(([tag, count]) => <a href={taxonomyUrl('tags', tag)} data-filter-tag={tag} aria-current={tag === activeTag ? 'true' : undefined}>#{tag}<span data-tag-count>{count}</span></a>)}
+      </div>
+    </details>
   </nav>
   <p class="side-card filter-summary" data-filter-summary hidden>
     <span></span><button type="button" data-clear-filter>清除筛选</button>
@@ -29,21 +37,38 @@ const allHref = interactive ? `${Astro.url.pathname}#articles` : withBasePath('/
 </div>
 
 <script>
+  import { withPostFilters } from '@utils/url';
+
   const filters = document.querySelector<HTMLElement>('[data-post-filters]');
   const root = filters?.closest<HTMLElement>('[data-post-filter-root]');
-  // Outside the article index, keep static archive URLs as the no-JS fallback.
-  if (filters && !root) {
-    for (const link of filters.querySelectorAll<HTMLAnchorElement>('a[data-filter-category], a[data-filter-tag]')) {
-      const url = new URL(filters.dataset.postsHref!, location.origin);
-      const key = link.hasAttribute('data-filter-category') ? 'category' : 'tag';
-      const value = link.dataset.filterCategory ?? link.dataset.filterTag;
-      if (value) url.searchParams.set(key, value);
-      link.href = url.href;
+  const archivePath = filters?.dataset.postsHref;
+  const disclosure = filters?.querySelector<HTMLDetailsElement>('[data-tag-disclosure]');
+  const wideScreen = window.matchMedia('(min-width: 47.01rem)');
+  if (disclosure) {
+    const syncDisclosure = () => { disclosure.open = wideScreen.matches; };
+    syncDisclosure();
+    wideScreen.addEventListener('change', syncDisclosure);
+  }
+  const categorySelector = 'a[data-filter-category]';
+  const tagSelector = 'a[data-filter-tag]';
+  if (archivePath) {
+    // The server-rendered links keep category and tag archives usable without JavaScript.
+    for (const link of document.querySelectorAll<HTMLAnchorElement>(categorySelector)) {
+      link.href = withPostFilters(archivePath, link.dataset.filterCategory);
+    }
+    for (const link of document.querySelectorAll<HTMLAnchorElement>(tagSelector)) {
+      link.href = withPostFilters(archivePath, '', link.dataset.filterTag);
+    }
+    const back = document.querySelector<HTMLAnchorElement>('[data-return-to-archive]');
+    if (back) {
+      const params = new URLSearchParams(location.search);
+      back.href = withPostFilters(archivePath, params.get('category') ?? '', params.get('tag') ?? '');
     }
   }
-  if (root && filters) {
+  if (root && filters && archivePath) {
     const cards = [...root.querySelectorAll<HTMLElement>('[data-post-category]')].map(element => ({
       element,
+      postLink: element.querySelector<HTMLAnchorElement>('.timeline__title')!,
       category: element.dataset.postCategory ?? '',
       tags: JSON.parse(element.dataset.postTags ?? '[]') as string[],
     }));
@@ -55,18 +80,12 @@ const allHref = interactive ? `${Astro.url.pathname}#articles` : withBasePath('/
     const empty = root.querySelector<HTMLElement>('[data-filter-empty]');
     const summary = filters.querySelector<HTMLElement>('[data-filter-summary]');
     const tagLabel = filters.querySelector<HTMLElement>('[data-tag-label]');
-    const categoryLinks = [...filters.querySelectorAll<HTMLAnchorElement>('a[data-filter-category]')];
-    const tagLinks = [...filters.querySelectorAll<HTMLAnchorElement>('a[data-filter-tag]')];
+    const selection = filters.querySelector<HTMLElement>('[data-tag-selection]');
+    const categoryLinks = [...filters.querySelectorAll<HTMLAnchorElement>(categorySelector)];
+    const tagLinks = [...filters.querySelectorAll<HTMLAnchorElement>(tagSelector)];
+    const allTagLinks = [...root.querySelectorAll<HTMLAnchorElement>(tagSelector)];
     let category = '';
     let tag = '';
-
-    // Keep real archive links as the no-JavaScript / open-in-new-tab path.
-    const tagUrls = new Map(tagLinks
-      .filter(link => link.dataset.filterTag).map(link => [link.href, link.dataset.filterTag!]));
-    for (const link of root.querySelectorAll<HTMLAnchorElement>('.sidebar a')) {
-      const value = tagUrls.get(link.href);
-      if (value) link.dataset.filterTag = value;
-    }
 
     function render() {
       const categoryCards = cards.filter(card => !category || card.category === category);
@@ -78,7 +97,10 @@ const allHref = interactive ? `${Astro.url.pathname}#articles` : withBasePath('/
       for (const card of cards) {
         const matches = (!category || card.category === category) && (!tag || card.tags.includes(tag));
         card.element.hidden = !matches;
-        if (matches) visible++;
+        if (matches) {
+          visible++;
+          card.postLink.href = withPostFilters(card.postLink.pathname, category, tag);
+        }
       }
       if (count) count.textContent = `${visible} 篇`;
       for (const group of root!.querySelectorAll<HTMLElement>('[data-year-group]')) {
@@ -89,6 +111,7 @@ const allHref = interactive ? `${Astro.url.pathname}#articles` : withBasePath('/
       }
       if (title) title.textContent = tag ? `#${tag}` : category ? `${category}文章` : defaultTitle;
       if (tagLabel) tagLabel.textContent = category ? `${category}标签` : '标签';
+      if (selection) selection.textContent = tag ? `#${tag} · ${visible} 篇` : `${visible} 篇`;
       if (empty) empty.hidden = visible !== 0;
       if (summary) {
         summary.hidden = !category && !tag;
@@ -107,7 +130,9 @@ const allHref = interactive ? `${Astro.url.pathname}#articles` : withBasePath('/
         link.querySelector<HTMLElement>('[data-tag-count]')!.textContent = String(total);
         if (value === tag) link.setAttribute('aria-current', 'true');
         else link.removeAttribute('aria-current');
-        if (!value) link.href = categoryLinks.find(item => item.dataset.filterCategory === category)!.href;
+      }
+      for (const link of allTagLinks) {
+        link.href = withPostFilters(archivePath!, category, link.dataset.filterTag);
       }
     }
 
@@ -144,8 +169,10 @@ const allHref = interactive ? `${Astro.url.pathname}#articles` : withBasePath('/
         if (category && tag && !cards.some(card => card.category === category && card.tags.includes(tag))) category = '';
       }
       remember();
-      // Sidebar and card tags can sit far from the results heading on mobile.
-      if (link && !filters!.contains(link)) filters!.scrollIntoView({ block: 'start' });
+      if (!wideScreen.matches && disclosure?.open && link && disclosure.contains(link)) {
+        disclosure.open = false;
+        disclosure.querySelector('summary')?.focus({ preventScroll: true });
+      }
     });
     window.addEventListener('popstate', restore);
     restore();
@@ -159,10 +186,30 @@ const allHref = interactive ? `${Astro.url.pathname}#articles` : withBasePath('/
     scroll-margin-top 1rem
   .tag-filter
     font-size .8rem
+    summary
+      cursor pointer
+      list-style none
+      &::-webkit-details-marker
+        display none
+      h2
+        margin 0
+    &__mobile-label, &__selection
+      display none
+    &__chevron
+      width .5rem
+      height .5rem
+      margin-left auto
+      margin-right .2rem
+      border solid var(--text-soft)
+      border-width 0 1.5px 1.5px 0
+      transform rotate(45deg)
+    details[open] .tag-filter__chevron
+      transform rotate(225deg)
     &__options
       display flex
       flex-wrap wrap
       gap .4rem .5rem
+      margin-top .8rem
     a
       display inline-flex
       align-items center
@@ -206,7 +253,24 @@ const allHref = interactive ? `${Astro.url.pathname}#articles` : withBasePath('/
 
   @media (max-width: 47rem)
     .post-filters
-      gap .7rem
+      gap .5rem
+    .category-filter, .tag-filter
+      padding .55rem .85rem
+    .category-filter h2
+      margin-bottom .35rem
+    .tag-filter summary h2
+      min-height 2.5rem
+    .tag-filter__mobile-label, .tag-filter__selection
+      display inline
+    .tag-filter__selection
+      margin-left auto
+      font-size .76rem
+      font-weight 500
+      color var(--text-secondary)
+    .tag-filter__chevron
+      margin-left .15rem
+    .filter-summary
+      padding .3rem .85rem
     .tag-filter a
       min-height 2.25rem
     .category-filter :global(.category-bar), .category-filter :global(.category-bar__scroll)

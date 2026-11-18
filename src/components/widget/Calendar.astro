@@ -16,7 +16,7 @@ const postMeta = posts.map((post) => ({
 }));
 ---
 
-<div class:list={['calendar', { 'calendar--compact': compact }]}>
+<div class="calendar">
     <!-- 头部 -->
      <div class="calendar__header">
         <button id="calendar-prev" class="calendar__prev" type="button" aria-label="上个月">
@@ -44,6 +44,8 @@ const postMeta = posts.map((post) => ({
         <!-- 日历格子将在这里生成 -->
       </div>
 
+      <div id="calendar-posts" class="calendar__posts" role="region" aria-label="日历文章" hidden={compact}></div>
+
       <div id="calendar-heatmap" class="calendar__heatmap" role="group" aria-label="文章发布热力图">
         <!-- 日历热力图将在这里生成 -->
       </div>
@@ -52,14 +54,9 @@ const postMeta = posts.map((post) => ({
         <!-- 提示信息将在这里生成 -->
       </div>
 
-      <div id="calendar-posts" class="calendar__posts">
-        <!-- 当天的文章列表将在这里生成 -->
-      </div>
-
-
 </div>
 
-<script is:inline define:vars={{ postMeta }}>
+<script is:inline define:vars={{ postMeta, compact }}>
     (() => {
         const posts = Array.isArray(postMeta) ? postMeta : [];
 
@@ -169,19 +166,19 @@ const postMeta = posts.map((post) => ({
             });
         }
 
-        function renderPosts() {
+        function renderPosts(day = null) {
             if (!postsEl) return;
-
-            const monthPosts = posts
-                .filter((post) => {
+            postsEl.replaceChildren();
+            postsEl.hidden = compact && day === null;
+            if (postsEl.hidden) return;
+            const entries = day === null
+                ? posts.filter((post) => {
                     const date = parseDateOnly(post.publishedDate);
                     return date.getFullYear() === year && date.getMonth() === month;
-                })
-                .sort((first, second) => second.publishedDate.localeCompare(first.publishedDate));
+                }).sort((first, second) => second.publishedDate.localeCompare(first.publishedDate))
+                : postByDays.get(`${year}-${month + 1}-${day}`) ?? [];
 
-            postsEl.replaceChildren();
-
-            if (monthPosts.length === 0) {
+            if (entries.length === 0) {
                 const empty = document.createElement('p');
                 empty.className = 'calendar__posts-empty';
                 empty.textContent = '本月暂无文章。';
@@ -190,7 +187,13 @@ const postMeta = posts.map((post) => ({
             }
 
             const fragment = document.createDocumentFragment();
-            for (const post of monthPosts) {
+            if (day !== null) {
+                const caption = document.createElement('p');
+                caption.className = 'calendar__selection';
+                caption.textContent = `${month + 1}月${day}日 · ${entries.length} 篇文章`;
+                fragment.appendChild(caption);
+            }
+            for (const post of entries) {
                 const date = parseDateOnly(post.publishedDate);
                 const item = document.createElement('div');
                 const title = document.createElement('a');
@@ -203,7 +206,8 @@ const postMeta = posts.map((post) => ({
                 title.textContent = post.title;
                 published.textContent = `${date.getMonth() + 1}-${date.getDate()}`;
 
-                item.append(title, published);
+                item.appendChild(title);
+                if (day === null) item.appendChild(published);
                 fragment.appendChild(item);
             }
             postsEl.appendChild(fragment);
@@ -223,17 +227,32 @@ const postMeta = posts.map((post) => ({
             for (let day = 1; day <= daysInMonth; day++) {
                 const key = `${year}-${month + 1}-${day}`;
                 const count = postByDays.get(key)?.length ?? 0;
-                const hasPost = count > 0;
                 const isToday = year === today.getFullYear()
                     && month === today.getMonth()
                     && day === today.getDate();
-                html += `<span class="calendar__cell${hasPost ? ' has-post' : ''}${isToday ? ' is-today' : ''}">${day}${count > 1 ? `<span class="calendar__count">${count}</span>` : ''}</span>`;
+                const cellClass = `calendar__cell${isToday ? ' is-today' : ''}`;
+                if (count === 0) {
+                    html += `<span class="${cellClass}">${day}</span>`;
+                } else {
+                    const label = `${year}年${month + 1}月${day}日，${count}篇文章`;
+                    const badge = count > 1 ? `<span class="calendar__count">${count}</span>` : '';
+                    html += `<button type="button" class="${cellClass} has-post" data-day="${day}" aria-label="${label}" aria-expanded="false" aria-controls="calendar-posts">${day}${badge}</button>`;
+                }
             }
 
             bodyEl.innerHTML = html;
             renderPosts();
             renderHeatmap();
         }
+
+        bodyEl?.addEventListener('click', (event) => {
+            const button = event.target.closest('button[data-day]');
+            if (!button) return;
+            const open = button.getAttribute('aria-expanded') !== 'true';
+            bodyEl.querySelector('[aria-expanded="true"]')?.setAttribute('aria-expanded', 'false');
+            button.setAttribute('aria-expanded', String(open));
+            renderPosts(open ? Number(button.dataset.day) : null);
+        });
 
         document.getElementById('calendar-prev')?.addEventListener('click', () => {
             month--;
@@ -265,8 +284,6 @@ const postMeta = posts.map((post) => ({
 </script>
 
 <style lang="stylus">
-    .calendar--compact .calendar__posts
-        display none
     .calendar__header
         display flex
         align-items center
@@ -314,8 +331,12 @@ const postMeta = posts.map((post) => ({
 
     .calendar__body :global(.calendar__cell.has-post)
         position relative
+        padding 0
+        border 0
+        background transparent
         color var(--text-primary)
         font-weight 700
+        cursor pointer
         &::after
             content ''
             position absolute
@@ -324,6 +345,11 @@ const postMeta = posts.map((post) => ({
             height .28rem
             border-radius 50%
             background var(--accent-pink-strong)
+
+    .calendar__body :global(.has-post[aria-expanded="true"]),
+    .calendar__body :global(.has-post:hover)
+        background var(--accent-tint)
+        box-shadow inset 0 0 0 1px var(--accent-blue)
 
     .calendar__body :global(.calendar__cell.is-today)
         color var(--text-primary)
@@ -364,9 +390,14 @@ const postMeta = posts.map((post) => ({
             background var(--surface-muted)
 
     .calendar__posts :global(.calendar__post-title)
-        overflow hidden
-        white-space nowrap
-        text-overflow ellipsis
+        overflow-wrap anywhere
+        text-underline-offset .2em
+
+    .calendar__posts :global(.calendar__selection)
+        margin 0 0 .2rem
+        font-size .78rem
+        font-weight 650
+        color var(--text-secondary)
 
     .calendar__posts :global(.calendar__post-date)
         flex-shrink 0

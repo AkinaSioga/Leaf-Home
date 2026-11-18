@@ -7,19 +7,21 @@ import ArticleTimeline from '@components/layout/ArticleTimeline.astro';
 import SideBar from '@components/layout/SideBar.astro';
 import RightSideBar from '@components/layout/RightSideBar.astro';
 import { buildTaxonomyCounts } from '@utils/postStats';
-import { withBasePath } from '@utils/url';
-interface Props { title: string; posts: CollectionEntry<'posts'>[]; allPosts: CollectionEntry<'posts'>[]; category?: string; }
-const { title, posts, allPosts, category } = Astro.props;
+import { withBasePath, withPostFilters } from '@utils/url';
+interface Props { title: string; posts: CollectionEntry<'posts'>[]; allPosts: CollectionEntry<'posts'>[]; category?: string; tag?: string; }
+const { title, posts, allPosts, category, tag } = Astro.props;
+const archiveUrl = withPostFilters(withBasePath('/posts/'), category, tag);
 const { categoryCounts, tagCounts } = buildTaxonomyCounts(allPosts);
 ---
 <BaseLayout title={title}>
+  <script is:inline define:vars={{ archiveUrl }}>location.replace(archiveUrl);</script>
   <Navbar title={title} subtitle="在文字之间，慢慢翻阅。" />
   <main class="home-shell home-shell--archive">
     <div class="content-column">
       <a class="back-link" href={withBasePath('/posts/')}>← 全部文章</a>
       <ArticleTimeline posts={posts} title={title} />
     </div>
-    <SideBar categoryCounts={categoryCounts} tagCounts={tagCounts} active={category ?? '__tag__'} />
+    <SideBar categoryCounts={categoryCounts} tagCounts={tagCounts} active={category} activeTag={tag} />
     <RightSideBar posts={allPosts} />
   </main>
   <Footer stats={{ posts: allPosts.length, categories: categoryCounts.size, tags: tagCounts.size }} />

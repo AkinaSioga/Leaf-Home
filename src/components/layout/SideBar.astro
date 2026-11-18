@@ -9,8 +9,9 @@ interface Props {
   tagCounts: Map<string, number>;
   interactive?: boolean;
   active?: string;
+  activeTag?: string;
 }
-const { categoryCounts, tagCounts, interactive = false, active } = Astro.props;
+const { categoryCounts, tagCounts, interactive = false, active, activeTag } = Astro.props;
 ---
 <aside class="sidebar" aria-label="个人与分类">
   <section class="side-card profile-card">
@@ -19,7 +20,7 @@ const { categoryCounts, tagCounts, interactive = false, active } = Astro.props;
     <p>{siteConfig.description}</p>
     <span class="profile-card__rule" aria-hidden="true"></span>
   </section>
-  <PostFilters categoryCounts={categoryCounts} tagCounts={tagCounts} interactive={interactive} active={active} />
+  <PostFilters categoryCounts={categoryCounts} tagCounts={tagCounts} interactive={interactive} active={active} activeTag={activeTag} />
   <MusicPlayer />
 </aside>
 <style lang="stylus">
