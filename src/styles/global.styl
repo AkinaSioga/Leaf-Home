@@ -351,6 +351,11 @@ button, input, textarea, select, code, pre, kbd, samp
     border-color var(--accent-blue)
 
 @media (max-width: 75rem)
+  // Hang the clock beside the back link while leaving the reading column in place.
+  .hero--compact:has(+ .reading-shell)
+    z-index 3
+    .visitor-mount--compact
+      height 2rem
   .home-shell
     grid-template-columns 13.5rem minmax(0, 1fr)
     grid-template-areas 'sidebar content' 'utility content'

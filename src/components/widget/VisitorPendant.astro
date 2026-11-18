@@ -1,0 +1,158 @@
+---
+import { previewContent } from '@utils/content';
+
+interface Props { compact?: boolean }
+const { compact = false } = Astro.props;
+const countOrigin = import.meta.env.PROD && !previewContent && Astro.site?.hostname === 'akinasuki.love'
+  ? Astro.site.origin : undefined;
+---
+<div class:list={['visitor-mount', { 'visitor-mount--compact': compact }]} data-visitor-widget data-count-origin={countOrigin}>
+  <div class="visitor-pendant" role="group" aria-label="访客与时间">
+    <span class="pendant-chains" aria-hidden="true"><i></i><i></i></span>
+    <dl class="pendant-glass visitor-readings" aria-label="站点访客">
+      <dt>今日访客：</dt><dd data-visitors-today>—</dd>
+      <dt>总计访客：</dt><dd data-visitors-total>—</dd>
+    </dl>
+    <span class="pendant-chains pendant-chains--short" aria-hidden="true"><i></i><i></i></span>
+    <time class="pendant-glass visitor-clock" data-visitor-clock title="设备当地时间，24 小时制">-- : --</time>
+  </div>
+</div>
+<script src="../../scripts/visitor-pendant.ts"></script>
+
+<style lang="stylus">
+  .visitor-mount
+    position relative
+    z-index 2
+    width calc(100% - 3rem)
+    max-width var(--content-width)
+    height 0
+    margin-inline auto
+    pointer-events none
+
+  .visitor-pendant
+    display grid
+    justify-items center
+    width max-content
+    margin-left clamp(1rem, 3vw, 3rem)
+    color var(--text-primary)
+    font-family var(--font-site)
+    font-variant-numeric tabular-nums
+    line-height 1.3
+
+  .visitor-mount--compact
+    height auto
+    .visitor-pendant
+      margin-left auto
+      margin-right 1.25rem
+
+  .pendant-chains
+    --ring-width .40rem
+    --ring-height .58rem
+    --ring-pitch .31rem
+    position relative
+    z-index 1
+    display flex
+    align-items center
+    justify-content space-between
+    width calc(100% - 2.2rem)
+    height calc(var(--ring-height) + var(--ring-pitch) * 2)
+    margin-block -1px
+    color var(--text-soft)
+    i, i::before, i::after
+      width var(--ring-width)
+      height var(--ring-height)
+      border 1.5px solid currentColor
+      border-radius 50%
+      box-shadow inset 0 .5px 0 rgba(255, 255, 255, .7), 0 .5px 0 rgba(255, 255, 255, .65)
+    i
+      position relative
+      width .22rem
+    i::before, i::after
+      content ''
+      position absolute
+      left 50%
+      top calc(50% - var(--ring-pitch))
+      transform translate(-50%, -50%)
+      box-sizing border-box
+    i::after
+      top calc(50% + var(--ring-pitch))
+
+  .pendant-chains--short
+    --ring-width .28rem
+    --ring-height .4rem
+    --ring-pitch .16rem
+    width 2.8rem
+
+  .pendant-glass
+    border 1px solid var(--glass-border)
+    background var(--surface-raised)
+    box-shadow var(--shadow-soft)
+    pointer-events auto
+    @supports (backdrop-filter: blur(1px))
+      background var(--glass-sheen), var(--glass-surface)
+      backdrop-filter blur(12px) saturate(1.12)
+
+  .visitor-readings
+    display grid
+    grid-template-columns auto auto
+    justify-content space-between
+    align-items baseline
+    gap .2rem .5rem
+    min-width 8rem
+    margin 0
+    padding .45rem .85rem
+    border-radius .85rem
+    white-space nowrap
+    dt
+      color var(--text-secondary)
+      font-size .76rem
+    dd
+      margin 0
+      text-align right
+      font-size .88rem
+      font-weight 700
+    dd:first-of-type
+      color var(--accent-pink-strong)
+
+  .visitor-clock
+    min-width 4.65rem
+    padding .14rem .6rem .2rem
+    border-radius .55rem
+    text-align center
+    font-size .97rem
+    font-weight 700
+    letter-spacing .045em
+    white-space nowrap
+
+  @media (max-width: 75rem)
+    .pendant-chains
+      --ring-height .46rem
+      --ring-pitch .22rem
+    .pendant-chains--short
+      --ring-height .32rem
+      --ring-pitch .14rem
+    .visitor-readings
+      min-width 6.4rem
+      gap .1rem .35rem
+      padding .36rem .6rem
+      border-radius .65rem
+      dt
+        font-size .7rem
+      dd
+        font-size .77rem
+    .visitor-clock
+      min-width 3.9rem
+      padding .14rem .45rem
+      font-size .82rem
+
+  @media (max-width: 47rem)
+    .visitor-mount
+      width calc(100% - 1.5rem)
+    .visitor-pendant, .visitor-mount--compact .visitor-pendant
+      margin-left auto
+      margin-right .6rem
+
+  @media (scripting: none)
+    .visitor-mount
+      display none
+</style>

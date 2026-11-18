@@ -7,6 +7,7 @@ import { navBarConfig } from '@config/navBarConfig';
 import { siteConfig } from '@config/site';
 import LightDarkSwitch from '@components/controls/LightDarkSwitch.svelte';
 import BubbleText from './BubbleText.astro';
+import VisitorPendant from '@components/widget/VisitorPendant.astro';
 import { withBasePath } from '@utils/url';
 
 interface Props { compact?: boolean; title?: string; subtitle?: string; }
@@ -49,6 +50,7 @@ const homeHref = withBasePath('/');
 
     <div class="site-nav__theme"><LightDarkSwitch client:load /></div>
   </nav>
+  <VisitorPendant compact={compact} />
 
   {!compact && <div class="hero__content">
     <div class="hero__copy">
@@ -63,6 +65,11 @@ const homeHref = withBasePath('/');
 </header>
 
 <style lang="stylus">
+  @media (max-width: 47rem)
+    .hero:not(.hero--home) .hero__copy h1
+      max-inline-size calc(100% - 6.5rem)
+      overflow-wrap anywhere
+
   .hero--home .hero__quote
     position relative
     width fit-content
