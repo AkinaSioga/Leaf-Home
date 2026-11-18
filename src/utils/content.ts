@@ -12,8 +12,13 @@ export const chapterUrl = (id: string) => withBasePath(`/writing/chapters/${segm
 export const essayUrl = (id: string) => withBasePath(`/writing/essays/${segments(id)}/`);
 export const taxonomyUrl = (kind: 'categories' | 'tags', name: string) => withBasePath(`/${kind}/${encodeURIComponent(name)}/`);
 export const statusLabel = { serializing: '正在连载', completed: '已完结', paused: '暂歇' } as const;
+// IDs are identifiers: use the same tie-break on Windows and on the Pages runner.
+function compareIds(a: { id: string }, b: { id: string }) {
+  if (a.id === b.id) return 0;
+  return a.id < b.id ? -1 : 1;
+}
 export const newest = <T extends { id: string; data: { publishedAt: Date } }>(a: T, b: T) =>
-  b.data.publishedAt.getTime() - a.data.publishedAt.getTime() || a.id.localeCompare(b.id);
+  b.data.publishedAt.getTime() - a.data.publishedAt.getTime() || compareIds(a, b);
 export const getPosts = async () => (await getCollection('posts', visible)).sort(newest);
 
 export async function getWriting() {
@@ -39,6 +44,6 @@ export async function getWriting() {
     (work.data.updatedAt ?? work.data.publishedAt).getTime(),
     ...chaptersFor(work.id).map(chapter => (chapter.data.updatedAt ?? chapter.data.publishedAt).getTime()),
   );
-  works.sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || updated(b) - updated(a) || a.id.localeCompare(b.id));
+  works.sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || updated(b) - updated(a) || compareIds(a, b));
   return { works, chapters, chaptersFor, essays: allEssays.filter(visible).sort(newest) };
 }

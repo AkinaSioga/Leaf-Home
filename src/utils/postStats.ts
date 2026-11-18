@@ -1,21 +1,31 @@
 import type { CollectionEntry } from 'astro:content';
 
-type PostEntry = CollectionEntry<'posts'>;
+export interface TagGroup {
+  total: number;
+  tags: Map<string, number>;
+}
 
-export function buildTaxonomyCounts(posts: readonly PostEntry[]) {
-  const categoryCounts = new Map<string, number>();
-  const tagCounts = new Map<string, number>();
+function emptyGroup(): TagGroup {
+  return { total: 0, tags: new Map() };
+}
 
-  for (const post of posts) {
-    categoryCounts.set(
-      post.data.category,
-      (categoryCounts.get(post.data.category) ?? 0) + 1,
-    );
-
-    for (const tag of post.data.tags) {
-      tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+export function buildPostStats(posts: readonly CollectionEntry<'posts'>[]) {
+  const all = emptyGroup();
+  const categories = new Map<string, TagGroup>();
+  for (const { data: { category, tags } } of posts) {
+    let branch = categories.get(category);
+    if (!branch) {
+      branch = emptyGroup();
+      categories.set(category, branch);
+    }
+    // The content schema guarantees one occurrence of each tag per post.
+    for (const group of [all, branch]) {
+      group.total++;
+      for (const tag of tags) group.tags.set(tag, (group.tags.get(tag) ?? 0) + 1);
     }
   }
-
-  return { categoryCounts, tagCounts };
+  const totals = { posts: all.total, categories: categories.size, tags: all.tags.size };
+  return { all, categories, totals };
 }
+
+export type PostStats = ReturnType<typeof buildPostStats>;

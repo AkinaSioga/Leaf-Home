@@ -1,32 +1,33 @@
 ---
 import { taxonomyUrl } from '@utils/content';
+import type { PostStats, TagGroup } from '@utils/postStats';
 import { withBasePath } from '@utils/url';
 
 interface Props {
-  categoryCounts: Map<string, number>;
+  stats: PostStats;
   active?: string;
-  filterable?: boolean;
+  interactive?: boolean;
   allHref?: string;
 }
 
-const { categoryCounts, active, filterable = false, allHref = withBasePath('/posts/') } = Astro.props;
-
-const categories = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1]);
-const total = categories.reduce((sum, [, count]) => sum + count, 0);
+const { stats, active, interactive = false, allHref = withBasePath('/posts/') } = Astro.props;
+const categories = [...stats.categories].sort((a, b) => b[1].total - a[1].total);
+const filterCounts = ({ total, tags }: TagGroup) =>
+  interactive ? JSON.stringify({ total, tags: [...tags] }) : undefined;
 ---
 
 <nav class="category-bar" aria-label="文章分类">
-    <a class:list={['category-pill', { 'category-pill--home': !active }]} href={allHref} data-filter-category={filterable ? '' : undefined} aria-current={!active ? 'page' : undefined}>
+    <a class:list={['category-pill', { 'category-pill--home': !active }]} href={allHref} data-filter-category="" data-filter-counts={filterCounts(stats.all)} aria-current={!active ? 'page' : undefined}>
       全部文章
-      <span class="category-pill__count">{total}</span>
+      <span class="category-pill__count">{stats.all.total}</span>
     </a>
 
   <div class="category-bar__scroll">
     {
-      categories.map(([name, count]) => (
-        <a class:list={['category-pill', { 'category-pill--home': active === name }]} href={taxonomyUrl('categories', name)} data-filter-category={filterable ? name : undefined} aria-current={active === name ? 'page' : undefined}>
+      categories.map(([name, group]) => (
+        <a class:list={['category-pill', { 'category-pill--home': active === name }]} href={taxonomyUrl('categories', name)} data-filter-category={name} data-filter-counts={filterCounts(group)} aria-current={active === name ? 'page' : undefined}>
           {name}
-          <span class="category-pill__count">{count}</span>
+          <span class="category-pill__count">{group.total}</span>
         </a>
       ))
     }

@@ -1,7 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { Icon } from 'astro-icon/components';
-import { postUrl } from '@utils/content';
+import { buildPostCalendar } from '@utils/postCalendar';
 
 interface Props {
     posts: CollectionEntry<'posts'>[];
@@ -9,14 +9,10 @@ interface Props {
 }
 
 const { posts, compact = false } = Astro.props;
-const postMeta = posts.map((post) => ({
-    title: post.data.title,
-    url: postUrl(post.id),
-    publishedDate: post.data.publishedAt.toISOString().slice(0, 10),
-}));
+const calendarIndex = buildPostCalendar(posts);
 ---
 
-<div class="calendar">
+<div class="calendar" data-calendar-index={JSON.stringify(calendarIndex)} data-compact={compact ? '' : undefined}>
     <!-- 头部 -->
      <div class="calendar__header">
         <button id="calendar-prev" class="calendar__prev" type="button" aria-label="上个月">
@@ -56,56 +52,39 @@ const postMeta = posts.map((post) => ({
 
 </div>
 
-<script is:inline define:vars={{ postMeta, compact }}>
-    (() => {
-        const posts = Array.isArray(postMeta) ? postMeta : [];
+<script>
+    import type { CalendarIndex } from '@utils/postCalendar';
 
-        function parseDateOnly(value) {
-            const [yearPart, monthPart, dayPart] = value.split('-').map(Number);
-            return new Date(yearPart, monthPart - 1, dayPart);
-        }
-
-        const postByDays = new Map();
-        for (const post of posts) {
-            const date = parseDateOnly(post.publishedDate);
-            const key = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-            const list = postByDays.get(key) ?? [];
-            list.push(post);
-            postByDays.set(key, list);
-        }
-
+    function initCalendar(calendar: HTMLElement) {
+        const index: CalendarIndex = JSON.parse(calendar.dataset.calendarIndex!);
+        const compact = calendar.hasAttribute('data-compact');
         const today = new Date();
         let year = today.getFullYear();
         let month = today.getMonth();
-        const titleEl = document.getElementById('calendar-title');
-        const bodyEl = document.getElementById('calendar-body');
-        const postsEl = document.getElementById('calendar-posts');
-        const heatmapEl = document.getElementById('calendar-heatmap');
-        const tooltipEl = document.getElementById('calendar-tooltip');
-
-        if (tooltipEl && tooltipEl.parentElement !== document.body) {
-            document.body.appendChild(tooltipEl);
-        }
+        const titleEl = calendar.querySelector<HTMLElement>('#calendar-title')!;
+        const bodyEl = calendar.querySelector<HTMLElement>('#calendar-body')!;
+        const postsEl = calendar.querySelector<HTMLElement>('#calendar-posts')!;
+        const heatmapEl = calendar.querySelector<HTMLElement>('#calendar-heatmap')!;
+        const tooltipEl = calendar.querySelector<HTMLElement>('#calendar-tooltip')!;
+        document.body.appendChild(tooltipEl);
 
         function hideHeatmapTooltip() {
-            if (tooltipEl) tooltipEl.hidden = true;
+            tooltipEl.hidden = true;
         }
 
-        function showHeatmapTooltip(cell) {
-            if (!tooltipEl) return;
+        function focusedHeatCell() {
+            return heatmapEl.querySelector<HTMLButtonElement>('.calendar__heat:focus-visible');
+        }
 
-            // A month change can move the grid under a stationary pointer.
-            const focusedCell = heatmapEl?.querySelector('.calendar__heat:focus-visible');
-            if (focusedCell) cell = focusedCell;
-            const text = cell.getAttribute('data-tooltip');
-            if (!text) return;
-
-            const rect = cell.getBoundingClientRect();
+        function showHeatmapTooltip(cell: HTMLButtonElement) {
+            // Changing months can move the grid under a stationary pointer.
+            const target = focusedHeatCell() ?? cell;
+            const rect = target.getBoundingClientRect();
             if (rect.bottom <= 0 || rect.top >= window.innerHeight) {
                 hideHeatmapTooltip();
                 return;
             }
-            tooltipEl.textContent = text;
+            tooltipEl.textContent = target.getAttribute('aria-label');
             tooltipEl.hidden = false;
             const tooltipRect = tooltipEl.getBoundingClientRect();
             const margin = 8;
@@ -119,118 +98,76 @@ const postMeta = posts.map((post) => ({
         }
 
         function renderHeatmap() {
-            if (!heatmapEl) return;
-
-            const counts = Array.from({ length: 12 }, () => [0, 0, 0, 0]);
-            for (const post of posts) {
-                const date = parseDateOnly(post.publishedDate);
-                if (date.getFullYear() !== year) continue;
-
-                const monthIndex = date.getMonth();
-                const weekIndex = Math.min(Math.floor((date.getDate() - 1) / 7), 3);
-                counts[monthIndex][weekIndex]++;
-            }
-
             heatmapEl.setAttribute('aria-label', `${year}年文章发布热力图`);
-            let html = Array.from({ length: 12 }, (_, index) =>
-                `<span class="calendar__heatmap-month" aria-hidden="true">${index + 1}</span>`).join('');
-            for (let weekIndex = 0; weekIndex < 4; weekIndex++) {
-                for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
-                    const count = counts[monthIndex][weekIndex];
-                    const level = Math.min(count, 4);
-                    const firstDay = weekIndex * 7 + 1;
-                    const lastDay = weekIndex === 3 ? new Date(year, monthIndex + 1, 0).getDate() : firstDay + 6;
-                    const tooltip = `${year}年${monthIndex + 1}月${firstDay}–${lastDay}日：${count}篇文章`;
-                    html += `<button type="button" class="calendar__heat" data-level="${level}" aria-label="${tooltip}" data-month="${monthIndex}" data-tooltip="${tooltip}"></button>`;
+            let html = Array.from({ length: 12 }, (_, i) =>
+                `<span class="calendar__heatmap-month" aria-hidden="true">${i + 1}</span>`).join('');
+            for (let band = 0; band < 4; band++) {
+                for (let m = 0; m < 12; m++) {
+                    const count = index[year]?.[m]?.bands[band] ?? 0;
+                    const firstDay = band * 7 + 1;
+                    const lastDay = band === 3 ? new Date(year, m + 1, 0).getDate() : firstDay + 6;
+                    const label = `${year}年${m + 1}月${firstDay}–${lastDay}日：${count}篇文章`;
+                    html += `<button type="button" class="calendar__heat" data-level="${Math.min(count, 4)}" data-month="${m}" aria-label="${label}"></button>`;
                 }
             }
             heatmapEl.innerHTML = html;
-
-            heatmapEl.querySelectorAll('.calendar__heat').forEach((cell, cellIndex) => {
-                cell.addEventListener('click', () => {
-                    const monthValue = cell.getAttribute('data-month');
-                    if (monthValue === null) return;
-
-                    hideHeatmapTooltip();
-                    const restoreFocus = document.activeElement === cell;
-                    month = Number(monthValue);
-                    render();
-                    if (restoreFocus) {
-                        heatmapEl.querySelectorAll('.calendar__heat')[cellIndex]?.focus({ preventScroll: true });
-                    }
-                });
-                cell.addEventListener('mouseenter', () => showHeatmapTooltip(cell));
-                cell.addEventListener('mouseleave', hideHeatmapTooltip);
-                cell.addEventListener('focus', () => showHeatmapTooltip(cell));
-                cell.addEventListener('blur', hideHeatmapTooltip);
-            });
         }
 
-        function renderPosts(day = null) {
-            if (!postsEl) return;
+        function renderPosts(selectedDay?: number) {
             postsEl.replaceChildren();
-            postsEl.hidden = compact && day === null;
+            postsEl.hidden = compact && selectedDay === undefined;
             if (postsEl.hidden) return;
-            const entries = day === null
-                ? posts.filter((post) => {
-                    const date = parseDateOnly(post.publishedDate);
-                    return date.getFullYear() === year && date.getMonth() === month;
-                }).sort((first, second) => second.publishedDate.localeCompare(first.publishedDate))
-                : postByDays.get(`${year}-${month + 1}-${day}`) ?? [];
 
-            if (entries.length === 0) {
+            const days = index[year]?.[month]?.days ?? {};
+            const dates = selectedDay === undefined
+                ? Object.keys(days).map(Number).sort((a, b) => b - a)
+                : [selectedDay];
+            if (dates.length === 0) {
                 const empty = document.createElement('p');
                 empty.className = 'calendar__posts-empty';
                 empty.textContent = '本月暂无文章。';
                 postsEl.appendChild(empty);
                 return;
             }
-
             const fragment = document.createDocumentFragment();
-            if (day !== null) {
+            if (selectedDay !== undefined) {
                 const caption = document.createElement('p');
                 caption.className = 'calendar__selection';
-                caption.textContent = `${month + 1}月${day}日 · ${entries.length} 篇文章`;
+                caption.textContent = `${month + 1}月${selectedDay}日 · ${days[selectedDay].length} 篇文章`;
                 fragment.appendChild(caption);
             }
-            for (const post of entries) {
-                const date = parseDateOnly(post.publishedDate);
-                const item = document.createElement('div');
-                const title = document.createElement('a');
-                title.href = post.url;
-                const published = document.createElement('span');
-
-                item.className = 'calendar__post';
-                title.className = 'calendar__post-title';
-                published.className = 'calendar__post-date';
-                title.textContent = post.title;
-                published.textContent = `${date.getMonth() + 1}-${date.getDate()}`;
-
-                item.appendChild(title);
-                if (day === null) item.appendChild(published);
-                fragment.appendChild(item);
+            for (const day of dates) {
+                for (const post of days[day]) {
+                    const item = document.createElement('div');
+                    item.className = 'calendar__post';
+                    const link = document.createElement('a');
+                    link.className = 'calendar__post-title';
+                    link.href = post.url;
+                    link.textContent = post.title;
+                    item.appendChild(link);
+                    if (selectedDay === undefined) {
+                        const dateLabel = document.createElement('span');
+                        dateLabel.className = 'calendar__post-date';
+                        dateLabel.textContent = `${month + 1}-${day}`;
+                        item.appendChild(dateLabel);
+                    }
+                    fragment.appendChild(item);
+                }
             }
             postsEl.appendChild(fragment);
         }
 
-        function render() {
-            if (!titleEl || !bodyEl) return;
-
+        function renderMonth() {
             const startWeekday = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const days = index[year]?.[month]?.days ?? {};
+            const currentMonth = year === today.getFullYear() && month === today.getMonth();
             titleEl.textContent = `${year}年${month + 1}月`;
 
-            let html = '';
-            for (let index = 0; index < startWeekday; index++) {
-                html += '<span class="calendar__cell calendar__cell--empty"></span>';
-            }
+            let html = '<span class="calendar__cell calendar__cell--empty"></span>'.repeat(startWeekday);
             for (let day = 1; day <= daysInMonth; day++) {
-                const key = `${year}-${month + 1}-${day}`;
-                const count = postByDays.get(key)?.length ?? 0;
-                const isToday = year === today.getFullYear()
-                    && month === today.getMonth()
-                    && day === today.getDate();
-                const cellClass = `calendar__cell${isToday ? ' is-today' : ''}`;
+                const count = days[day]?.length ?? 0;
+                const cellClass = `calendar__cell${currentMonth && day === today.getDate() ? ' is-today' : ''}`;
                 if (count === 0) {
                     html += `<span class="${cellClass}">${day}</span>`;
                 } else {
@@ -239,48 +176,56 @@ const postMeta = posts.map((post) => ({
                     html += `<button type="button" class="${cellClass} has-post" data-day="${day}" aria-label="${label}" aria-expanded="false" aria-controls="calendar-posts">${day}${badge}</button>`;
                 }
             }
-
             bodyEl.innerHTML = html;
             renderPosts();
-            renderHeatmap();
         }
 
-        bodyEl?.addEventListener('click', (event) => {
-            const button = event.target.closest('button[data-day]');
+        function updateTooltipPosition() {
+            const cell = focusedHeatCell();
+            if (cell) showHeatmapTooltip(cell);
+            else hideHeatmapTooltip();
+        }
+
+        function showMonth(nextMonth: number) {
+            const date = new Date(year, nextMonth, 1);
+            const yearChanged = date.getFullYear() !== year;
+            year = date.getFullYear();
+            month = date.getMonth();
+            renderMonth();
+            if (yearChanged) renderHeatmap();
+            updateTooltipPosition();
+        }
+
+        bodyEl.addEventListener('click', event => {
+            if (!(event.target instanceof Element)) return;
+            const button = event.target.closest<HTMLButtonElement>('button[data-day]');
             if (!button) return;
             const open = button.getAttribute('aria-expanded') !== 'true';
             bodyEl.querySelector('[aria-expanded="true"]')?.setAttribute('aria-expanded', 'false');
             button.setAttribute('aria-expanded', String(open));
-            renderPosts(open ? Number(button.dataset.day) : null);
+            renderPosts(open ? Number(button.dataset.day) : undefined);
         });
+        calendar.querySelector('#calendar-prev')!.addEventListener('click', () => showMonth(month - 1));
+        calendar.querySelector('#calendar-next')!.addEventListener('click', () => showMonth(month + 1));
 
-        document.getElementById('calendar-prev')?.addEventListener('click', () => {
-            month--;
-            if (month < 0) {
-                month = 11;
-                year--;
-            }
-            render();
+        heatmapEl.addEventListener('click', event => {
+            if (event.target instanceof HTMLButtonElement) showMonth(Number(event.target.dataset.month));
         });
-
-        document.getElementById('calendar-next')?.addEventListener('click', () => {
-            month++;
-            if (month > 11) {
-                month = 0;
-                year++;
-            }
-            render();
-        });
-
-        function updateTooltipPosition() {
-            const focusedCell = heatmapEl?.querySelector('.calendar__heat:focus-visible');
-            if (focusedCell) showHeatmapTooltip(focusedCell);
-            else hideHeatmapTooltip();
+        function showCellTooltip(event: Event) {
+            if (event.target instanceof HTMLButtonElement) showHeatmapTooltip(event.target);
         }
+        heatmapEl.addEventListener('pointerover', showCellTooltip);
+        heatmapEl.addEventListener('pointerout', updateTooltipPosition);
+        heatmapEl.addEventListener('focusin', showCellTooltip);
+        heatmapEl.addEventListener('focusout', hideHeatmapTooltip);
         window.addEventListener('scroll', updateTooltipPosition, { passive: true });
         window.addEventListener('resize', updateTooltipPosition);
-        render();
-    })();
+        renderMonth();
+        renderHeatmap();
+    }
+
+    const calendar = document.querySelector<HTMLElement>('[data-calendar-index]');
+    if (calendar) initCalendar(calendar);
 </script>
 
 <style lang="stylus">

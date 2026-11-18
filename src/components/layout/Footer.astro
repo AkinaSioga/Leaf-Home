@@ -1,6 +1,7 @@
 ---
 import { siteConfig } from '@config/site';
-interface Props { stats?: { posts: number; categories: number; tags: number }; }
+import type { PostStats } from '@utils/postStats';
+interface Props { stats?: PostStats['totals']; }
 const { stats } = Astro.props;
 ---
 <footer class="site-footer">

@@ -6,12 +6,12 @@ import Footer from '@components/layout/Footer.astro';
 import ArticleTimeline from '@components/layout/ArticleTimeline.astro';
 import SideBar from '@components/layout/SideBar.astro';
 import RightSideBar from '@components/layout/RightSideBar.astro';
-import { buildTaxonomyCounts } from '@utils/postStats';
+import { buildPostStats } from '@utils/postStats';
 import { withBasePath, withPostFilters } from '@utils/url';
 interface Props { title: string; posts: CollectionEntry<'posts'>[]; allPosts: CollectionEntry<'posts'>[]; category?: string; tag?: string; }
 const { title, posts, allPosts, category, tag } = Astro.props;
 const archiveUrl = withPostFilters(withBasePath('/posts/'), category, tag);
-const { categoryCounts, tagCounts } = buildTaxonomyCounts(allPosts);
+const stats = buildPostStats(allPosts);
 ---
 <BaseLayout title={title}>
   <script is:inline define:vars={{ archiveUrl }}>location.replace(archiveUrl);</script>
@@ -21,8 +21,8 @@ const { categoryCounts, tagCounts } = buildTaxonomyCounts(allPosts);
       <a class="back-link" href={withBasePath('/posts/')}>← 全部文章</a>
       <ArticleTimeline posts={posts} title={title} />
     </div>
-    <SideBar categoryCounts={categoryCounts} tagCounts={tagCounts} active={category} activeTag={tag} />
-    <RightSideBar posts={allPosts} />
+    <SideBar stats={stats} active={category} activeTag={tag} />
+    <RightSideBar posts={allPosts} totals={stats.totals} />
   </main>
-  <Footer stats={{ posts: allPosts.length, categories: categoryCounts.size, tags: tagCounts.size }} />
+  <Footer stats={stats.totals} />
 </BaseLayout>

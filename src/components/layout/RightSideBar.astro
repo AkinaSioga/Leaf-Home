@@ -4,20 +4,19 @@ import { Icon } from 'astro-icon/components';
 import Calendar from '@components/widget/Calendar.astro';
 import ShortNotes from '@components/widget/ShortNotes.astro';
 import Now from '@components/widget/Now.astro';
-import { buildTaxonomyCounts } from '@utils/postStats';
+import type { PostStats } from '@utils/postStats';
 import { withBasePath } from '@utils/url';
-interface Props { posts: CollectionEntry<'posts'>[]; }
-const { posts } = Astro.props;
-const { categoryCounts, tagCounts } = buildTaxonomyCounts(posts);
+interface Props { posts: CollectionEntry<'posts'>[]; totals: PostStats['totals']; }
+const { posts, totals } = Astro.props;
 ---
 <aside class="utility-sidebar" aria-label="日常与站点信息">
   <ShortNotes />
   <section class="side-card stats-card" aria-labelledby="stats-title">
     <h2 id="stats-title"><Icon name="material-symbols:bar-chart-rounded" aria-hidden="true" />站点统计</h2>
     <dl>
-      <div><dt><Icon name="material-symbols:description-outline-rounded" aria-hidden="true" />文章</dt><dd>{posts.length}</dd></div>
-      <div><dt><Icon name="material-symbols:folder-open-outline-rounded" aria-hidden="true" />分类</dt><dd>{categoryCounts.size}</dd></div>
-      <div><dt><Icon name="material-symbols:label-outline-rounded" aria-hidden="true" />标签</dt><dd>{tagCounts.size}</dd></div>
+      <div><dt><Icon name="material-symbols:description-outline-rounded" aria-hidden="true" />文章</dt><dd>{totals.posts}</dd></div>
+      <div><dt><Icon name="material-symbols:folder-open-outline-rounded" aria-hidden="true" />分类</dt><dd>{totals.categories}</dd></div>
+      <div><dt><Icon name="material-symbols:label-outline-rounded" aria-hidden="true" />标签</dt><dd>{totals.tags}</dd></div>
     </dl>
   </section>
   <section class="side-card calendar-card" aria-label="文章日历">

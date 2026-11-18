@@ -4,14 +4,14 @@ import { siteConfig } from '@config/site';
 import avatar from '@assets/avatar.jpg';
 import PostFilters from './PostFilters.astro';
 import MusicPlayer from '@components/widget/MusicPlayer.astro';
+import type { PostStats } from '@utils/postStats';
 interface Props {
-  categoryCounts: Map<string, number>;
-  tagCounts: Map<string, number>;
+  stats: PostStats;
   interactive?: boolean;
   active?: string;
   activeTag?: string;
 }
-const { categoryCounts, tagCounts, interactive = false, active, activeTag } = Astro.props;
+const { stats, interactive = false, active, activeTag } = Astro.props;
 ---
 <aside class="sidebar" aria-label="个人与分类">
   <section class="side-card profile-card">
@@ -20,7 +20,7 @@ const { categoryCounts, tagCounts, interactive = false, active, activeTag } = As
     <p>{siteConfig.description}</p>
     <span class="profile-card__rule" aria-hidden="true"></span>
   </section>
-  <PostFilters categoryCounts={categoryCounts} tagCounts={tagCounts} interactive={interactive} active={active} activeTag={activeTag} />
+  <PostFilters stats={stats} interactive={interactive} active={active} activeTag={activeTag} />
   <MusicPlayer />
 </aside>
 <style lang="stylus">

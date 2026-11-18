@@ -5,11 +5,11 @@ import SideBar from '@components/layout/SideBar.astro';
 import Footer from '@components/layout/Footer.astro';
 import Navbar from '@components/layout/Navbar.astro';
 import BaseLayout from '@layouts/BaseLayout.astro';
-import { buildTaxonomyCounts } from '@utils/postStats';
+import { buildPostStats } from '@utils/postStats';
 import RightSideBar from '@components/layout/RightSideBar.astro';
 
 const posts = await getPosts();
-const { categoryCounts, tagCounts } = buildTaxonomyCounts(posts);
+const stats = buildPostStats(posts);
 ---
 
 <BaseLayout>
@@ -20,9 +20,9 @@ const { categoryCounts, tagCounts } = buildTaxonomyCounts(posts);
       <ArticleList posts={posts} />
     </div>
 
-    <SideBar categoryCounts={categoryCounts} tagCounts={tagCounts} />
-    <RightSideBar posts={posts} />
+    <SideBar stats={stats} />
+    <RightSideBar posts={posts} totals={stats.totals} />
   </main>
 
-  <Footer stats={{ posts: posts.length, categories: categoryCounts.size, tags: tagCounts.size }} />
+  <Footer stats={stats.totals} />
 </BaseLayout>

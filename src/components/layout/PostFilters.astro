@@ -2,19 +2,20 @@
 import CategoryBar from './CategoryBar.astro';
 import { Icon } from 'astro-icon/components';
 import { taxonomyUrl } from '@utils/content';
+import type { PostStats } from '@utils/postStats';
 import { withBasePath } from '@utils/url';
 
-interface Props { categoryCounts: Map<string, number>; tagCounts: Map<string, number>; interactive?: boolean; active?: string; activeTag?: string; }
-const { categoryCounts, tagCounts, interactive = false, active, activeTag = '' } = Astro.props;
+interface Props { stats: PostStats; interactive?: boolean; active?: string; activeTag?: string; }
+const { stats, interactive = false, active, activeTag = '' } = Astro.props;
+const { total, tags: tagCounts } = stats.all;
 const tags = [...tagCounts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-const total = [...categoryCounts.values()].reduce((sum, count) => sum + count, 0);
 const allHref = interactive ? `${Astro.url.pathname}#articles` : withBasePath('/posts/');
 ---
 
 <div class="post-filters" data-post-filters data-posts-href={withBasePath('/posts/')}>
   <section class="side-card category-filter">
     <h2><Icon name="material-symbols:folder-open-outline-rounded" aria-hidden="true" />分类</h2>
-    <CategoryBar categoryCounts={categoryCounts} allHref={allHref} active={active} filterable />
+    <CategoryBar stats={stats} allHref={allHref} active={active} interactive={interactive} />
   </section>
   <nav class="side-card tag-filter" aria-label="按标签筛选">
     <details data-tag-disclosure>
@@ -72,8 +73,6 @@ const allHref = interactive ? `${Astro.url.pathname}#articles` : withBasePath('/
       category: element.dataset.postCategory ?? '',
       tags: JSON.parse(element.dataset.postTags ?? '[]') as string[],
     }));
-    const categories = new Set(cards.map(card => card.category));
-    const tags = new Set(cards.flatMap(card => card.tags));
     const count = root.querySelector<HTMLElement>('[data-post-count]');
     const title = root.querySelector<HTMLElement>('[data-post-title]');
     const defaultTitle = title?.textContent ?? '最新文章';
@@ -82,17 +81,17 @@ const allHref = interactive ? `${Astro.url.pathname}#articles` : withBasePath('/
     const tagLabel = filters.querySelector<HTMLElement>('[data-tag-label]');
     const selection = filters.querySelector<HTMLElement>('[data-tag-selection]');
     const categoryLinks = [...filters.querySelectorAll<HTMLAnchorElement>(categorySelector)];
+    const groups = new Map(categoryLinks.map(link => {
+      const group = JSON.parse(link.dataset.filterCounts!) as { total: number; tags: [string, number][] };
+      return [link.dataset.filterCategory!, { total: group.total, tags: new Map(group.tags) }] as const;
+    }));
     const tagLinks = [...filters.querySelectorAll<HTMLAnchorElement>(tagSelector)];
     const allTagLinks = [...root.querySelectorAll<HTMLAnchorElement>(tagSelector)];
     let category = '';
     let tag = '';
 
     function render() {
-      const categoryCards = cards.filter(card => !category || card.category === category);
-      const availableTags = new Map<string, number>();
-      for (const card of categoryCards) {
-        for (const value of new Set(card.tags)) availableTags.set(value, (availableTags.get(value) ?? 0) + 1);
-      }
+      const group = groups.get(category)!;
       let visible = 0;
       for (const card of cards) {
         const matches = (!category || card.category === category) && (!tag || card.tags.includes(tag));
@@ -125,7 +124,7 @@ const allHref = interactive ? `${Astro.url.pathname}#articles` : withBasePath('/
       }
       for (const link of tagLinks) {
         const value = link.dataset.filterTag ?? '';
-        const total = value ? availableTags.get(value) ?? 0 : categoryCards.length;
+        const total = value ? group.tags.get(value) ?? 0 : group.total;
         link.hidden = Boolean(value) && total === 0;
         link.querySelector<HTMLElement>('[data-tag-count]')!.textContent = String(total);
         if (value === tag) link.setAttribute('aria-current', 'true');
@@ -138,9 +137,10 @@ const allHref = interactive ? `${Astro.url.pathname}#articles` : withBasePath('/
 
     function restore() {
       const params = new URLSearchParams(location.search);
-      category = categories.has(params.get('category') ?? '') ? params.get('category')! : '';
-      tag = tags.has(params.get('tag') ?? '') ? params.get('tag')! : '';
-      if (tag && !cards.some(card => (!category || card.category === category) && card.tags.includes(tag))) tag = '';
+      const requestedCategory = params.get('category') ?? '';
+      const requestedTag = params.get('tag') ?? '';
+      category = groups.has(requestedCategory) ? requestedCategory : '';
+      tag = groups.get(category)!.tags.has(requestedTag) ? requestedTag : '';
       render();
     }
 
@@ -166,7 +166,7 @@ const allHref = interactive ? `${Astro.url.pathname}#articles` : withBasePath('/
       } else {
         tag = link!.dataset.filterTag ?? '';
         // A sidebar tag may belong to a different branch; always show its articles.
-        if (category && tag && !cards.some(card => card.category === category && card.tags.includes(tag))) category = '';
+        if (category && tag && !groups.get(category)!.tags.has(tag)) category = '';
       }
       remember();
       if (!wideScreen.matches && disclosure?.open && link && disclosure.contains(link)) {

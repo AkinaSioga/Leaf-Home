@@ -7,7 +7,7 @@ import SideBar from '@components/layout/SideBar.astro';
 import ShortNotes from '@components/widget/ShortNotes.astro';
 import { Icon } from 'astro-icon/components';
 import { getPosts, dated, taxonomyUrl } from '@utils/content';
-import { buildTaxonomyCounts } from '@utils/postStats';
+import { buildPostStats } from '@utils/postStats';
 import { withBasePath } from '@utils/url';
 export async function getStaticPaths() {
   return (await getPosts()).map(post => ({ params: { id: post.id }, props: { post } }));
@@ -16,7 +16,7 @@ interface Props { post: CollectionEntry<'posts'>; }
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
 const posts = await getPosts();
-const { categoryCounts, tagCounts } = buildTaxonomyCounts(posts);
+const stats = buildPostStats(posts);
 const outline = headings.filter(heading => heading.depth === 2 || heading.depth === 3);
 ---
 <BaseLayout title={post.data.title} description={post.data.description}>
@@ -33,7 +33,7 @@ const outline = headings.filter(heading => heading.depth === 2 || heading.depth 
       <nav class="post-tags" aria-label="文章标签">{post.data.tags.map(tag => <a href={taxonomyUrl('tags', tag)} data-filter-tag={tag}>#{tag}</a>)}</nav>
     </article>
     </div>
-    <SideBar categoryCounts={categoryCounts} tagCounts={tagCounts} active={post.data.category} />
+    <SideBar stats={stats} active={post.data.category} />
     <aside class="utility-sidebar reading-aside" aria-label="文章目录与日常">
       {outline.length > 0 && <nav class="side-card post-outline" aria-label="文章目录">
         <h2><Icon name="material-symbols:format-list-bulleted-rounded" aria-hidden="true" />目录</h2>
@@ -42,7 +42,7 @@ const outline = headings.filter(heading => heading.depth === 2 || heading.depth 
       <ShortNotes />
     </aside>
   </main>
-  <Footer stats={{ posts: posts.length, categories: categoryCounts.size, tags: tagCounts.size }} />
+  <Footer stats={stats.totals} />
 </BaseLayout>
 <script src="../../scripts/copy-code.ts"></script>
 <style lang="stylus">
