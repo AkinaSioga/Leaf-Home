@@ -1,6 +1,5 @@
 ---
 import CategoryBar from './CategoryBar.astro';
-import { Icon } from 'astro-icon/components';
 import { taxonomyUrl } from '@utils/content';
 import type { PostStats } from '@utils/postStats';
 import { withBasePath } from '@utils/url';
@@ -14,13 +13,13 @@ const allHref = interactive ? `${Astro.url.pathname}#articles` : withBasePath('/
 
 <div class="post-filters" data-post-filters data-posts-href={withBasePath('/posts/')}>
   <section class="side-card category-filter">
-    <h2><Icon name="material-symbols:folder-open-outline-rounded" aria-hidden="true" />分类</h2>
+    <h2>分类</h2>
     <CategoryBar stats={stats} allHref={allHref} active={active} interactive={interactive} />
   </section>
   <nav class="side-card tag-filter" aria-label="按标签筛选">
     <details data-tag-disclosure>
       <summary>
-        <h2><Icon name="material-symbols:label-outline-rounded" aria-hidden="true" />
+        <h2>
           <span><span data-tag-label>标签</span><span class="tag-filter__mobile-label">筛选</span></span>
           <span class="tag-filter__selection" data-tag-selection>{activeTag ? `#${activeTag} · ${tagCounts.get(activeTag)} 篇` : `${total} 篇`}</span>
           <span class="tag-filter__chevron" aria-hidden="true"></span>

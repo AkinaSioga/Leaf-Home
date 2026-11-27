@@ -1,81 +1,278 @@
 ---
 import { Icon } from 'astro-icon/components';
 import type { CollectionEntry } from 'astro:content';
-import { postUrl, dated } from '@utils/content';
+import { postUrl, dated, taxonomyUrl } from '@utils/content';
+import { estimateReadingMinutes, type PostStats } from '@utils/postStats';
 import { withBasePath } from '@utils/url';
-interface Props { posts: CollectionEntry<'posts'>[]; title?: string; }
-const { posts, title = '最新文章' } = Astro.props;
+interface Props { posts: CollectionEntry<'posts'>[]; stats: PostStats; }
+const { posts, stats } = Astro.props;
 ---
 <section class="article-section" id="articles" aria-labelledby="article-heading">
-  <div class="section-heading">
-    <h2 id="article-heading">{title}</h2><span>{posts.length} 篇</span>
-  </div>
+  <h2 id="article-heading" class="article-section__sr-only">最新文章</h2>
+  <nav class="quick-categories" aria-label="首页文章分类">
+    <a class="quick-categories__home" href="#articles" data-home-category="" aria-label="查看全部文章">
+      <Icon name="material-symbols:home-rounded" aria-hidden="true" />
+    </a>
+    <div class="quick-categories__filters">
+      <a class="quick-categories__pill" href="#articles" data-home-category="" aria-current="true">
+        全部 <span>{stats.all.total}</span>
+      </a>
+      {[...stats.categories].map(([category, group]) => (
+        <a class="quick-categories__pill" href={taxonomyUrl('categories', category)} data-home-category={category}>
+          {category} <span>{group.total}</span>
+        </a>
+      ))}
+    </div>
+    <a class="quick-categories__archive" href={withBasePath('/posts/')}>
+      更多文章 <Icon name="material-symbols:chevron-right-rounded" aria-hidden="true" />
+    </a>
+  </nav>
+  <p class="article-section__sr-only" data-home-filter-status role="status"></p>
   <div class="article-list">
-    {posts.map(post => (
-      <article class="article-card">
+    {posts.map(post => {
+      const href = postUrl(post.id);
+      const { cover, category } = post.data;
+      return <article class:list={['article-card', { 'article-card--covered': cover }]} data-home-article-category={category}>
         <div class="article-card__copy">
-          <h3><a href={postUrl(post.id)}>{post.data.title}</a></h3>
+          <h3><a class="article-card__title" href={href}>{post.data.title}</a></h3>
           <div class="article-card__meta">
-            <time datetime={post.data.publishedAt.toISOString()}><Icon name="material-symbols:calendar-month-outline-rounded" aria-hidden="true" />{dated(post.data.publishedAt)}</time>
+            <time datetime={post.data.publishedAt.toISOString()}>
+              <span class="article-card__meta-icon"><Icon name="material-symbols:calendar-month-outline-rounded" aria-hidden="true" /></span>
+              {dated(post.data.publishedAt)}
+            </time>
+            <a href={taxonomyUrl('categories', category)}>
+              <span class="article-card__meta-icon"><Icon name="material-symbols:folder-open-outline-rounded" aria-hidden="true" /></span>
+              {category}
+            </a>
+            <span>
+              <span class="article-card__meta-icon"><Icon name="material-symbols:schedule-rounded" aria-hidden="true" /></span>
+              约 {estimateReadingMinutes(post.body)} 分钟
+            </span>
             {post.data.draft && <span>草稿</span>}
           </div>
           <p>{post.data.description}</p>
+          {post.data.tags.length > 0 && <ul class="article-card__tags" aria-label="文章标签">
+            {post.data.tags.slice(0, 3).map(tag => <li><a class="article-card__chip" href={taxonomyUrl('tags', tag)}>#{tag}</a></li>)}
+            {post.data.tags.length > 3 && <li><span class="article-card__chip" aria-label={`另有 ${post.data.tags.length - 3} 个标签`}>+{post.data.tags.length - 3}</span></li>}
+          </ul>}
         </div>
-        {post.data.cover && <a class="article-card__cover" href={postUrl(post.id)} tabindex="-1" aria-hidden="true">
-          <img src={post.data.cover.startsWith('/') ? withBasePath(post.data.cover) : post.data.cover} alt="" loading="lazy" />
+        {cover ? <a class="article-card__cover" href={href} tabindex="-1" aria-hidden="true">
+          <img src={cover.startsWith('/') ? withBasePath(cover) : cover} alt="" loading="lazy" />
           <span class="article-card__arrow"><Icon name="material-symbols:chevron-right-rounded" /></span>
+        </a> : <a class="article-card__entry" href={href} tabindex="-1" aria-hidden="true">
+          <Icon name="material-symbols:chevron-right-rounded" />
         </a>}
-      </article>
-    ))}
+      </article>;
+    })}
   </div>
   {posts.length === 0 && <p class="empty-state">这里还很安静。新的文章，慢慢写。</p>}
 </section>
+
+<script>
+  const section = document.querySelector<HTMLElement>('#articles.article-section');
+  const toolbar = section?.querySelector<HTMLElement>('.quick-categories');
+  if (section && toolbar) {
+    const cards = section.querySelectorAll<HTMLElement>('[data-home-article-category]');
+    const pills = toolbar.querySelectorAll<HTMLAnchorElement>('.quick-categories__pill');
+    const status = section.querySelector<HTMLElement>('[data-home-filter-status]');
+
+    toolbar.addEventListener('click', event => {
+      if (!(event.target instanceof Element) || event.defaultPrevented || event.button !== 0 ||
+        event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      const link = event.target.closest<HTMLAnchorElement>('a[data-home-category]');
+      if (!link) return;
+      event.preventDefault();
+      const category = link.dataset.homeCategory;
+      section.dataset.filtered = '';
+      let visible = 0;
+      for (const card of cards) {
+        card.hidden = Boolean(category) && card.dataset.homeArticleCategory !== category;
+        if (!card.hidden) visible++;
+      }
+      for (const pill of pills) {
+        if (pill.dataset.homeCategory === category) pill.setAttribute('aria-current', 'true');
+        else pill.removeAttribute('aria-current');
+      }
+      if (status) status.textContent = `${category || '全部'} · ${visible} 篇文章`;
+    });
+  }
+</script>
+
 <style lang="stylus">
+  .article-section__sr-only
+    position absolute
+    width 1px
+    height 1px
+    margin -1px
+    overflow hidden
+    clip-path inset(50%)
+    white-space nowrap
+  .quick-categories
+    display flex
+    align-items center
+    gap .6rem
+    margin 0 0 1.15rem
+    padding .48rem .7rem
+    font-size .84rem
+    a
+      text-decoration none
+      transition color .2s ease, background .2s ease
+  .quick-categories__home
+    display grid
+    place-items center
+    flex 0 0 2.4rem
+    height 2.4rem
+    border-radius .75rem
+    color var(--accent-on-solid)
+    background var(--accent-solid)
+    &:hover
+      background var(--accent-pink-strong)
+    svg
+      width 1.25rem
+      height 1.25rem
+  .quick-categories__filters
+    display flex
+    flex 1
+    min-width 0
+    gap .3rem
+    overflow-x auto
+    scrollbar-width thin
+  .quick-categories__pill
+    display inline-flex
+    flex 0 0 auto
+    align-items center
+    gap .35rem
+    padding .35rem .65rem
+    border-radius .65rem
+    color var(--text-secondary)
+    white-space nowrap
+    &:hover, &[aria-current='true']
+      color var(--accent-blue-strong)
+      background var(--accent-tint)
+    &[aria-current='true']
+      background var(--accent-tint-strong)
+      font-weight 700
+    &:focus-visible
+      outline-offset -2px
+    span
+      min-width 1.1rem
+      padding 0 .25rem
+      border-radius .32rem
+      color var(--accent-blue-strong)
+      background var(--surface-muted)
+      text-align center
+      font-size .7rem
+      font-variant-numeric tabular-nums
+  .quick-categories__archive
+    display inline-flex
+    flex-shrink 0
+    align-items center
+    gap .12rem
+    color var(--text-secondary)
+    white-space nowrap
+    &:hover
+      color var(--accent-blue-strong)
+    svg
+      width 1.1rem
+      height 1.1rem
   .article-list
     display grid
-    gap 1rem
+    gap 1.15rem
   .article-card
     display grid
-    grid-template-columns minmax(0, 1fr) 26%
-    gap 1.1rem
-    padding 1.15rem
-    transition box-shadow .2s, border-color .2s
-    &:hover
-      border-color var(--accent-blue)
+    grid-template-columns minmax(0, 1fr) 3.1rem
+    gap 1.15rem
+    padding 1.4rem 1.5rem
+    transition transform .24s ease, box-shadow .24s ease
+    &:focus-within
       box-shadow var(--shadow-card)
+      .article-card__title
+        color var(--accent-blue-strong)
+    @media (hover: hover)
+      &:hover
+        transform translateY(-2px)
+        box-shadow var(--shadow-card)
+        .article-card__title
+          color var(--accent-blue-strong)
+        .article-card__entry
+          background var(--accent-tint-strong)
+          svg
+            transform translateX(3px)
+        .article-card__cover img
+          transform scale(1.04)
+  .article-card--covered
+    grid-template-columns minmax(0, 1fr) 26%
   .article-card__copy
     min-width 0
-    padding .1rem .1rem .15rem .35rem
+    padding-inline-start .85rem
   h3
     position relative
     margin 0 0 .6rem
-    font-size 1.25rem
-    line-height 1.5
+    font-size 1.35rem
+    line-height 1.45
     &::before
       content ''
       position absolute
-      left -1.5rem
-      top .25rem
+      inset-inline-start -.85rem
+      top .15em
       width 4px
-      height 1.3rem
-      border-radius 4px
+      height 1.15em
+      border-radius 999px
       background var(--accent-pink)
+  .article-card__title
+    overflow-wrap anywhere
+    transition color .24s ease
   .article-card__meta
     display flex
     flex-wrap wrap
     align-items center
-    gap .4rem .6rem
-    font-size .75rem
+    gap .4rem .75rem
+    font-size .8rem
     color var(--text-soft)
-    time
+    > :is(time, a, span)
       display inline-flex
       align-items center
-      gap .3rem
+      gap .35rem
+    a
+      color var(--accent-blue-strong)
+      text-decoration none
+      &:hover
+        text-decoration underline
+        text-underline-offset .2em
+  .article-card__meta-icon
+    display grid
+    place-items center
+    flex 0 0 1.65rem
+    width 1.65rem
+    height 1.65rem
+    border-radius .45rem
+    color var(--accent-blue-strong)
+    background var(--accent-tint)
     svg
       width 1rem
       height 1rem
-      color var(--accent-blue)
-  p
+  .article-card__tags
+    display flex
+    flex-wrap wrap
+    gap .3rem .4rem
+    margin .75rem 0 0
+    padding 0
+    list-style none
+  .article-card__chip
+    display inline-block
+    max-width 100%
+    padding .08rem .55rem
+    border-radius .5rem
+    background unquote('color-mix(in srgb, var(--accent-tint) 78%, transparent)')
+    color var(--text-secondary)
+    font-size .72rem
+    line-height 1.65
+    overflow-wrap anywhere
+    text-decoration none
+  a.article-card__chip:hover
+    color var(--accent-blue-strong)
+    background var(--accent-tint)
+  .article-card__copy p
     display -webkit-box
     -webkit-line-clamp 2
     -webkit-box-orient vertical
@@ -98,6 +295,18 @@ const { posts, title = '最新文章' } = Astro.props;
       inset 0
       object-fit cover
       object-position 52% center
+      transition transform .38s ease
+  .article-card__entry
+    display grid
+    place-items center
+    border-radius .85rem
+    color var(--accent-blue-strong)
+    background var(--accent-tint)
+    transition background .24s ease
+    svg
+      width 1.5rem
+      height 1.5rem
+      transition transform .24s ease
   .article-card__arrow
     position absolute
     right .6rem
@@ -112,24 +321,29 @@ const { posts, title = '最新文章' } = Astro.props;
     svg
       width 1.3rem
       height 1.3rem
-  @media (max-width: 60rem)
-    .article-card
-      grid-template-columns minmax(0, 1fr) 24%
-      gap .75rem
-    h3
-      font-size 1.1rem
   @media (max-width: 47rem)
+    .quick-categories
+      gap .4rem
+      padding .42rem .5rem
+      font-size .78rem
+    .quick-categories__home
+      flex-basis 2.15rem
+      height 2.15rem
+    .quick-categories__pill
+      gap .25rem
+      padding .3rem .45rem
     .article-card
-      grid-template-columns minmax(0, 1fr)
       padding 1rem
+      gap .75rem
+      grid-template-columns minmax(0, 1fr)
+    .article-card__entry
+      display none
     .article-card__cover
       grid-row 1
       height 9.5rem
       min-height 0
       img
         object-position center 35%
-    .article-card__copy
-      padding .15rem .1rem
-    h3::before
-      left -1.15rem
+    h3
+      font-size 1.15rem
 </style>

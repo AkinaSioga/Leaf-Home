@@ -6,6 +6,7 @@ import '@styles/fonts.css';
 import '@styles/global.styl';
 import '@styles/markdown.styl';
 import { previewContent } from '@utils/content';
+import BackToTop from '@components/controls/BackToTop.astro';
 
 interface Props {
   title?: string;
@@ -20,13 +21,15 @@ const {
 } = Astro.props;
 
 const pageTitle = title === siteConfig.name ? title : `${title} · ${siteConfig.name}`;
+const countOrigin = import.meta.env.PROD && !previewContent && Astro.site?.hostname === 'akinasuki.love'
+  ? Astro.site.origin : undefined;
 const favicons = await Promise.all(
   [16, 32].map(width => getImage({ src: deniaHead, width, height: width, format: 'png' })),
 );
 ---
 
 <!doctype html>
-<html lang={siteConfig.language} data-theme-preference="system">
+<html lang={siteConfig.language} data-theme-preference="system" data-count-origin={countOrigin}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -34,7 +37,7 @@ const favicons = await Promise.all(
     <meta name="description" content={description} />
     {favicons.map(icon => <link rel="icon" type="image/png" sizes={`${icon.attributes.width}x${icon.attributes.height}`} href={icon.src} />)}
     {(noindex || previewContent) && <meta name="robots" content="noindex, nofollow" />}
-    <meta name="theme-color" content="#fbf7fb" />
+    <meta name="theme-color" content="#f2edf5" />
     <title>{pageTitle}</title>
     <script is:inline>
       (() => {
@@ -56,12 +59,14 @@ const favicons = await Promise.all(
         document.documentElement.dataset.themePreference = preference;
         document
           .querySelector('meta[name="theme-color"]')
-          ?.setAttribute('content', theme === 'dark' ? '#080e1c' : '#fbf7fb');
+          ?.setAttribute('content', theme === 'dark' ? '#090e1a' : '#f2edf5');
       })();
     </script>
+    <script src="../scripts/visitor-pendant.ts"></script>
   </head>
-  <body>
+  <body class="site-shell">
     {previewContent && <aside class="draft-banner">本地草稿预览 · 含排版示例，正式构建不会发布草稿</aside>}
     <slot />
+    <BackToTop />
   </body>
 </html>

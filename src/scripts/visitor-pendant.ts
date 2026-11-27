@@ -29,17 +29,19 @@ async function recordVisit(postKey?: string): Promise<VisitCounts | null> {
   }
 }
 
-function initPendant(widget: HTMLElement) {
-  const readings = widget.querySelector<HTMLElement>('.visitor-readings')!;
-  const today = readings.querySelector<HTMLElement>('[data-visitors-today]')!;
-  const total = readings.querySelector<HTMLElement>('[data-visitors-total]')!;
-  const clock = widget.querySelector<HTMLTimeElement>('[data-visitor-clock]')!;
-  const countVisits = widget.dataset.countOrigin === location.origin;
+function initVisitorStats() {
+  const widget = document.querySelector<HTMLElement>('[data-visitor-widget]');
+  const readings = widget?.querySelector<HTMLElement>('.visitor-readings');
+  const today = readings?.querySelector<HTMLElement>('[data-visitors-today]');
+  const total = readings?.querySelector<HTMLElement>('[data-visitors-total]');
+  const clock = widget?.querySelector<HTMLTimeElement>('[data-visitor-clock]');
+  const countVisits = document.documentElement.dataset.countOrigin === location.origin;
   const postViews = document.querySelector<HTMLElement>('[data-post-view-key]');
   let pendingPostKey = postViews?.dataset.postViewKey;
   if (postViews && !countVisits) postViews.title = '预览页面不计入阅读量';
   const description = countVisits ? '不蒜子独立访客统计' : '预览页面不计入访客统计';
-  readings.title = description;
+  if (readings) readings.title = description;
+  if (!countVisits && !clock) return;
   let requestedDay = '';
   let retryOnReturn = false;
   let minuteTimer = 0;
@@ -59,7 +61,7 @@ function initPendant(widget: HTMLElement) {
   async function loadVisitors(day: string) {
     requestedDay = day;
     retryOnReturn = false;
-    readings.setAttribute('aria-busy', 'true');
+    readings?.setAttribute('aria-busy', 'true');
     const online = navigator.onLine;
     const postKey = pendingPostKey;
     // A timed-out POST may already have incremented PV. Retries and midnight
@@ -71,21 +73,25 @@ function initPendant(widget: HTMLElement) {
     if (requestedDay !== day) return;
     const dailyVisitors = parseCount(result?.busuanzi_today_uv);
     const totalVisitors = parseCount(result?.busuanzi_site_uv);
-    showCount(today, dailyVisitors);
-    showCount(total, totalVisitors);
+    if (today) showCount(today, dailyVisitors);
+    if (total) showCount(total, totalVisitors);
     retryOnReturn = dailyVisitors === null || totalVisitors === null;
-    readings.title = retryOnReturn ? '访客统计暂不可用' : description;
-    readings.removeAttribute('aria-busy');
+    if (readings) {
+      readings.title = retryOnReturn ? '访客统计暂不可用' : description;
+      readings.removeAttribute('aria-busy');
+    }
   }
 
   function tick() {
     window.clearTimeout(minuteTimer);
     if (document.hidden) return;
     const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    clock.dateTime = `${hours}:${minutes}`;
-    clock.textContent = `${hours} : ${minutes}`;
+    if (clock) {
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      clock.dateTime = `${hours}:${minutes}`;
+      clock.textContent = `${hours} : ${minutes}`;
+    }
     if (countVisits) {
       const day = serviceDay.format(now);
       if (requestedDay !== day) void loadVisitors(day);
@@ -103,5 +109,4 @@ function initPendant(widget: HTMLElement) {
   tick();
 }
 
-const widget = document.querySelector<HTMLElement>('[data-visitor-widget]');
-if (widget) initPendant(widget);
+initVisitorStats();

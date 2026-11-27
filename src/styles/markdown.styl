@@ -80,6 +80,7 @@
     right .15rem
   table
     display block
+    width fit-content
     max-width 100%
     overflow-x auto
     border-collapse collapse
@@ -87,6 +88,12 @@
   th, td
     padding .5rem .8rem
     border 1px solid var(--literary-rule, var(--line-soft))
+  th:first-child, td:first-child
+    min-width 6.5rem
+    word-break keep-all
+  @media (max-width: 47rem)
+    th, td
+      min-width 8rem
   hr
     border 0
     border-top 1px solid var(--literary-rule, var(--line-soft))
@@ -132,9 +139,20 @@
     color var(--accent-blue-strong)
     font-size .85rem
   h1
+    position relative
+    padding-inline-start .85rem
     font-size clamp(1.8rem, 4vw, 2.5rem)
     margin .6rem 0
     line-height 1.4
+    &::before
+      content ''
+      position absolute
+      inset-inline-start 0
+      top .2em
+      height 1em
+      width 4px
+      border-radius 4px
+      background var(--accent-pink)
 
 .post-meta
   color var(--text-soft)

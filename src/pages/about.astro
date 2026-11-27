@@ -1,5 +1,6 @@
 ---
 import Navbar from '@components/layout/Navbar.astro';
+import Footer from '@components/layout/Footer.astro';
 import { siteConfig } from '@config/site';
 import BaseLayout from '@layouts/BaseLayout.astro';
 ---
@@ -9,11 +10,9 @@ import BaseLayout from '@layouts/BaseLayout.astro';
 
   <main class="page-shell">
     <section class="page-panel" aria-labelledby="about-heading">
-      <div class="section-heading">
-        <div>
-          <h1 id="about-heading">关于</h1>
-        </div>
-      </div>
+      <header class="post-heading">
+        <h1 id="about-heading">关于</h1>
+      </header>
 
       <div class="prose">
         <p>你好，我是 {siteConfig.author}。{siteConfig.description}</p>
@@ -22,8 +21,5 @@ import BaseLayout from '@layouts/BaseLayout.astro';
     </section>
   </main>
 
-  <footer class="site-footer">
-    <p>© {new Date().getFullYear()} {siteConfig.author}</p>
-    <p>Built quietly with Astro.</p>
-  </footer>
+  <Footer />
 </BaseLayout>

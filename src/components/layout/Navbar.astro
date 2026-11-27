@@ -13,11 +13,11 @@ import { withBasePath } from '@utils/url';
 interface Props { compact?: boolean; title?: string; subtitle?: string; }
 const { compact = false, title = siteConfig.heroTitle, subtitle = siteConfig.heroSubtitle } = Astro.props;
 const links = navBarConfig.links;
-const isHome = Astro.props.title === undefined;
 const lightHero = await getImage({ src: lightHeroImage, width: 1280, format: 'webp', quality: 88 });
 const currentPath = Astro.url.pathname.replace(/\/$/, '');
 
 const homeHref = withBasePath('/');
+const isHome = !compact && currentPath === homeHref.replace(/\/$/, '');
 ---
 
 <header class:list={['hero', { 'hero--compact': compact, 'hero--home': isHome }]} id="top" style={`--hero-image-dark: url("${heroImage.src}"); --hero-image-light: url("${lightHero.src}")`}>
@@ -50,7 +50,7 @@ const homeHref = withBasePath('/');
 
     <div class="site-nav__theme"><LightDarkSwitch client:load /></div>
   </nav>
-  <VisitorPendant compact={compact} />
+  {isHome && <VisitorPendant />}
 
   {!compact && <div class="hero__content">
     <div class="hero__copy">
@@ -61,7 +61,13 @@ const homeHref = withBasePath('/');
       </div>
     </div>
   </div>}
-  {!compact && <svg class="hero__edge" viewBox="0 0 1440 50" preserveAspectRatio="none" aria-hidden="true"><path d="M0 22C190 0 300 50 530 29S820 9 1050 29S1290 5 1440 20V50H0Z" fill="currentColor" /></svg>}
+  {!compact && <svg class="hero__edge" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true" fill="currentColor">
+    {isHome && <>
+      <path opacity=".26" d="M0 11C174 38 308 3 512 10S800 43 1023 22S1291 1 1440 11V60H0Z" />
+      <path opacity=".52" d="M0 24C190 4 334 16 523 28S796 38 1037 24S1305 13 1440 25V60H0Z" />
+    </>}
+    <path d="M0 26C190 0 300 60 530 35S820 11 1050 35S1290 6 1440 24V60H0Z" />
+  </svg>}
 </header>
 
 <style lang="stylus">
@@ -91,7 +97,7 @@ const homeHref = withBasePath('/');
       background radial-gradient(circle at 30% 25%, rgba(255, 255, 255, .8) 0 6%, transparent 22%)
       box-shadow inset -1px -1px 2px rgba(255, 255, 255, .3)
       opacity 0
-      animation hero-quote-bubble 16s ease-out infinite
+      animation hero-quote-bubble 1.15s ease-out both
       &:nth-child(2)
         --bubble-drift -8px
         left 28%
@@ -118,12 +124,12 @@ const homeHref = withBasePath('/');
         animation-delay .5s
 
   @keyframes hero-quote-bubble
-    0%, 70%
+    0%
       opacity 0
       transform translate(0, 10px) scale(.55)
-    10%, 78%
+    22%
       opacity .45
-    30%, 96%, 100%
+    100%
       opacity 0
       transform translate(var(--bubble-drift), -30px) scale(1.15)
 

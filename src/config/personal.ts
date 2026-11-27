@@ -21,9 +21,9 @@ export const personalConfig: {
   bookmarks: Bookmark[];
 } = {
   now: {
-    updatedAt: '2026-09-17',
+    updatedAt: '2026-11-27',
     items: [
-      { text: '给博客添一点个人日常', status: 'ongoing' },
+      { text: '捣鼓云游戏服务器，贴皮和制作地图', status: 'ongoing' },
       { text: '整理博客第一版，创建 PR', status: 'done' },
     ],
   },

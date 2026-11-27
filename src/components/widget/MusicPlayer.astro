@@ -1,45 +1,25 @@
 ---
-import { Icon } from 'astro-icon/components';
+import { musicTracks } from '@config/music';
+import { withBasePath } from '@utils/url';
 ---
-<section class="side-card music-card" aria-labelledby="music-title">
-  <h2 id="music-title"><Icon name="material-symbols:music-note-rounded" aria-hidden="true" />音乐</h2>
-  <p class="music-card__empty">暂无曲目</p>
-  <div class="music-card__progress" aria-hidden="true"></div>
-  <div class="music-card__controls" role="group" aria-label="音乐播放控制，暂无曲目">
-    <button type="button" disabled aria-label="上一曲"><Icon name="material-symbols:skip-previous-rounded" /></button>
-    <button class="music-card__play" type="button" disabled aria-label="播放"><Icon name="material-symbols:play-arrow-rounded" /></button>
-    <button type="button" disabled aria-label="下一曲"><Icon name="material-symbols:skip-next-rounded" /></button>
-  </div>
-</section>
+{musicTracks.length > 0 && <section class="side-card music-card" aria-labelledby="music-title">
+  <h2 id="music-title">音乐</h2>
+  <ul class="music-card__tracks">
+    {musicTracks.map(track => <li>
+      <p>{track.title}</p>
+      <audio controls preload="none" aria-label={track.title} src={track.src.startsWith('/') ? withBasePath(track.src) : track.src}></audio>
+    </li>)}
+  </ul>
+</section>}
 <style lang="stylus">
-  .music-card__empty
-    text-align center
-    font-size .75rem
-  .music-card__progress
-    height .25rem
-    margin 1rem 0 .65rem
-    border-radius 1rem
-    background var(--accent-tint)
-  .music-card__controls
-    display flex
-    align-items center
-    justify-content center
-    gap 1.35rem
-    button
-      display grid
-      place-items center
-      width 2rem
-      height 2rem
-      padding 0
-      border 0
-      background transparent
-      color var(--accent-blue)
-      cursor default
-      svg
-        width 1.25rem
-        height 1.25rem
-    .music-card__play
-      border-radius 50%
-      color var(--surface-raised)
-      background var(--accent-blue)
+  .music-card__tracks
+    display grid
+    gap .75rem
+    margin 0
+    padding 0
+    list-style none
+    audio
+      display block
+      width 100%
+      margin-top .35rem
 </style>

@@ -20,10 +20,11 @@ const { Content, headings } = await render(post);
 const posts = await getPosts();
 const stats = buildPostStats(posts);
 const outline = headings.filter(heading => heading.depth === 2 || heading.depth === 3);
+const hasOutline = outline.length > 0;
 ---
 <BaseLayout title={post.data.title} description={post.data.description}>
   <Navbar compact />
-  <main class="home-shell home-shell--compact reading-shell">
+  <main class:list={['home-shell', 'home-shell--compact', 'reading-shell', { 'reading-shell--no-outline': !hasOutline }]}>
     <div class="content-column">
       <article class="page-panel post-page">
       <a class="back-link" data-return-to-archive href={withBasePath('/posts/')}>← 返回文章</a>
@@ -42,18 +43,23 @@ const outline = headings.filter(heading => heading.depth === 2 || heading.depth 
     </article>
     </div>
     <SideBar stats={stats} active={post.data.category} />
-    <aside class="utility-sidebar reading-aside" aria-label="文章目录与日常">
-      {outline.length > 0 && <nav class="side-card post-outline" aria-label="文章目录">
-        <h2><Icon name="material-symbols:format-list-bulleted-rounded" aria-hidden="true" />目录</h2>
+    {hasOutline && <aside class="utility-sidebar reading-aside" aria-label="文章目录与日常">
+      <nav class="side-card post-outline" aria-label="文章目录">
+        <h2>目录</h2>
         <ol>{outline.map(heading => <li class:list={{ 'post-outline__child': heading.depth === 3 }}><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ol>
-      </nav>}
+      </nav>
       <ShortNotes />
-    </aside>
+    </aside>}
   </main>
   <Footer stats={stats.totals} />
 </BaseLayout>
 <script src="../../scripts/copy-code.ts"></script>
 <style lang="stylus">
+  .reading-shell--no-outline
+    --reading-width 52rem
+    grid-template-columns var(--sidebar-width) minmax(0, 1fr)
+    grid-template-areas 'sidebar content'
+    max-width calc(var(--sidebar-width) + 1.25rem + var(--reading-width))
   .post-page
     width 100%
     min-width 0
@@ -100,10 +106,19 @@ const outline = headings.filter(heading => heading.depth === 2 || heading.depth 
       padding-left .75rem
       border-left 2px solid var(--line-soft)
   @media (min-width: 75.01rem)
+    .reading-shell--no-outline
+      grid-template-columns var(--sidebar-width) minmax(0, var(--reading-width))
+      justify-content center
+      margin-inline auto
     .reading-aside
       position sticky
       top 1.25rem
   @media (max-width: 47rem)
-    .reading-shell :global(.sidebar)
-      display none
+    .reading-shell
+      grid-template-columns minmax(0, 1fr)
+      grid-template-areas 'content' 'utility'
+      :global(.sidebar)
+        display none
+    .reading-shell--no-outline
+      grid-template-areas 'content'
 </style>

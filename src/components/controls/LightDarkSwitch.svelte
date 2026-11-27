@@ -26,7 +26,7 @@
     document.documentElement.dataset.theme = theme;
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute('content', theme === 'dark' ? '#080e1c' : '#fbf7fb');
+      ?.setAttribute('content', theme === 'dark' ? '#090e1a' : '#f2edf5');
   }
   
   function selectTheme(value: ThemePreference) {

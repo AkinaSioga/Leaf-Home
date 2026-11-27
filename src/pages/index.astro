@@ -15,9 +15,9 @@ const stats = buildPostStats(posts);
 <BaseLayout>
   <Navbar />
 
-  <main class="home-shell">
+  <main class="home-shell home-shell--index">
     <div class="content-column">
-      <ArticleList posts={posts} />
+      <ArticleList posts={posts} stats={stats} />
     </div>
 
     <SideBar stats={stats} />
@@ -26,3 +26,19 @@ const stats = buildPostStats(posts);
 
   <Footer stats={stats.totals} />
 </BaseLayout>
+
+<script>
+  const sidebars = document.querySelectorAll<HTMLElement>('.home-shell--index > :is(.sidebar, .utility-sidebar)');
+
+  function updateSticky() {
+    for (const sidebar of sidebars) {
+      const inset = Number.parseFloat(getComputedStyle(sidebar).top);
+      sidebar.toggleAttribute('data-sticky', sidebar.offsetHeight + 2 * inset <= window.innerHeight);
+    }
+  }
+
+  const observer = new ResizeObserver(updateSticky);
+  for (const sidebar of sidebars) observer.observe(sidebar);
+  window.addEventListener('resize', updateSticky);
+  updateSticky();
+</script>

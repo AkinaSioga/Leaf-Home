@@ -12,7 +12,7 @@ const { posts, totals } = Astro.props;
 <aside class="utility-sidebar" aria-label="日常与站点信息">
   <ShortNotes />
   <section class="side-card stats-card" aria-labelledby="stats-title">
-    <h2 id="stats-title"><Icon name="material-symbols:bar-chart-rounded" aria-hidden="true" />站点统计</h2>
+    <h2 id="stats-title">站点统计</h2>
     <dl>
       <div><dt><Icon name="material-symbols:description-outline-rounded" aria-hidden="true" />文章</dt><dd>{totals.posts}</dd></div>
       <div><dt><Icon name="material-symbols:folder-open-outline-rounded" aria-hidden="true" />分类</dt><dd>{totals.categories}</dd></div>

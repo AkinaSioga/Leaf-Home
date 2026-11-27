@@ -4,10 +4,10 @@ const { text, splitLines = false } = Astro.props;
 const lines = splitLines ? text.split(/(?<=，)/) : [text];
 const lastIndex = Math.max(Array.from(text).length - 1, 1);
 let offset = 0;
-// Each language uses the same entrance window, even when its character count differs.
+// Keep the complete line within the same entrance window regardless of length.
 const glyphLines = lines.map(line => Array.from(line).map(glyph => ({
   glyph,
-  delay: Math.round(offset++ / lastIndex * 3200),
+  delay: Math.round(offset++ / lastIndex * 475),
 })));
 ---
 
@@ -33,26 +33,22 @@ const glyphLines = lines.map(line => Array.from(line).map(glyph => ({
     display inline-block
     white-space pre
     transform-origin center 65%
-    animation hero-letter-bubble 16s ease-in-out infinite both
-    animation-delay var(--bubble-delay)
+    animation hero-letter-bubble .76s ease-out backwards
+    animation-delay calc(var(--bubble-start, 0ms) + var(--bubble-delay))
 
   @keyframes hero-letter-bubble
     0%
       opacity 0
       transform translateY(.65em) scale(.7)
       filter blur(1px)
-    4%
+    68%
       opacity 1
       transform translateY(-.12em) scale(1.06)
       filter blur(0)
-    6.5%, 64%
+    100%
       opacity 1
       transform none
       filter blur(0)
-    80%, 100%
-      opacity 0
-      transform translateY(-.6em) scale(.94)
-      filter blur(1px)
 
   @media (prefers-reduced-motion: reduce)
     .bubble-text__glyph

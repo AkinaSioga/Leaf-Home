@@ -41,6 +41,12 @@ const { stats, interactive = false, active, activeTag } = Astro.props;
     aspect-ratio 1
     border-radius .8rem
     object-fit cover
+    outline 1px solid var(--avatar-border, transparent)
+    outline-offset -1px
+    filter brightness(var(--avatar-brightness, 1))
+    transition filter .2s ease
+    &:hover
+      filter brightness(1)
   .profile-card__rule
     display block
     width 1.5rem

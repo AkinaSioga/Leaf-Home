@@ -1,0 +1,63 @@
+---
+import { Icon } from 'astro-icon/components';
+---
+
+<button class="back-to-top" type="button" aria-label="返回顶部" data-back-to-top>
+  <Icon name="material-symbols:arrow-upward-rounded" aria-hidden="true" />
+</button>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('[data-back-to-top]');
+  if (button) {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const updateVisibility = () => button.toggleAttribute('data-visible', window.scrollY > 300);
+    window.addEventListener('scroll', updateVisibility, { passive: true });
+    window.addEventListener('pageshow', updateVisibility);
+    button.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+    });
+    updateVisibility();
+  }
+</script>
+
+<style lang="stylus">
+  .back-to-top
+    position fixed
+    z-index 12
+    right calc(clamp(.85rem, 2vw, 1.75rem) + env(safe-area-inset-right, 0px))
+    bottom calc(1rem + env(safe-area-inset-bottom, 0px))
+    display grid
+    place-items center
+    width 2.75rem
+    height 2.75rem
+    padding 0
+    border 1px solid var(--nav-glass-border)
+    border-radius 50%
+    background var(--surface-raised)
+    color var(--accent-blue-strong)
+    box-shadow var(--shadow-soft)
+    cursor pointer
+    visibility hidden
+    pointer-events none
+    opacity 0
+    transform translateY(.45rem)
+    transition opacity .24s ease, transform .24s ease, background .2s ease, visibility 0s .24s
+
+    @supports (backdrop-filter: blur(1px))
+      background var(--nav-glass-surface)
+      backdrop-filter blur(14px) saturate(var(--nav-saturation))
+
+    &[data-visible]
+      visibility visible
+      pointer-events auto
+      opacity 1
+      transform none
+      transition-delay 0s
+
+    &:hover
+      background var(--accent-tint)
+
+    svg
+      width 1.25rem
+      height 1.25rem
+</style>

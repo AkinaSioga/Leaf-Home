@@ -1,28 +1,41 @@
 dark-tokens()
   color-scheme dark
-  --page-bg #080e1c
-  --page-bg-accent #121a30
+  --page-bg #090e1a
+  --page-bg-accent #111a2f
   --surface #141e32
   --surface-raised #141e32
   --surface-muted #1c2941
   --glass-surface rgba(20, 30, 50, .66)
   --glass-border rgba(192, 208, 255, .2)
   --glass-sheen linear-gradient(135deg, rgba(211, 221, 255, .07), rgba(211, 221, 255, 0) 60%)
-  --ambient-rose rgba(126, 105, 196, .22)
-  --ambient-blue rgba(64, 143, 184, .2)
+  --nav-glass-surface rgba(13, 20, 36, .62)
+  --nav-glass-border rgba(186, 197, 255, .18)
+  --nav-highlight inset 0 1px 0 rgba(225, 233, 255, .08)
+  --nav-saturation 1.2
+  --card-glass-surface rgba(20, 29, 49, .82)
+  --card-border rgba(156, 159, 229, .14)
+  --card-highlight inset 0 1px 0 rgba(255, 255, 255, .08)
+  --card-shadow 0 8px 28px rgba(2, 7, 18, .22), 0 2px 5px rgba(2, 7, 18, .13)
+  --avatar-brightness .93
+  --avatar-border rgba(192, 208, 255, .18)
+  --ambient-rose rgba(121, 104, 202, .23)
+  --ambient-blue rgba(66, 140, 198, .21)
   --text-primary #ebedf8
   --text-secondary #b5bfd5
   --text-soft #9eaac4
   --line-soft rgba(170, 186, 226, .14)
-  --accent-blue #9c9fe5
-  --accent-blue-strong #c1c3ff
-  --accent-pink #9c9fe5
-  --accent-pink-strong #c1c3ff
-  --accent-cyan #81cedf
-  --accent-tint #2b3657
-  --focus-ring #9c9fe5
+  --accent-blue #afb5fa
+  --accent-blue-strong #cdd2ff
+  --accent-pink #afa9f6
+  --accent-pink-strong #cdd2ff
+  --accent-cyan #9ddff0
+  --accent-tint #293656
+  --accent-tint-strong #3c4a75
+  --accent-solid #b5b7fc
+  --accent-on-solid #171d36
+  --focus-ring #afb5fa
   --shadow-soft 0 6px 24px rgba(0, 0, 0, .15), inset 0 1px 0 rgba(223, 232, 255, .08)
-  --shadow-card 0 10px 35px rgba(0, 0, 0, .2)
+  --shadow-card 0 10px 35px rgba(0, 0, 0, .3)
   --hero-overlay linear-gradient(90deg, rgba(6, 14, 35, .5), rgba(6, 14, 35, .02) 68%)
   --hero-position center 17%
   --hero-text #fff
@@ -39,7 +52,7 @@ dark-tokens()
 :root
   --font-site "LXGW 975 Yuan", "Microsoft YaHei", system-ui, sans-serif
   color-scheme light
-  --page-bg #fbf7fb
+  --page-bg #f2edf5
   --page-bg-accent #f4edf7
   --surface #fff
   --surface-raised #fff
@@ -47,8 +60,16 @@ dark-tokens()
   --glass-surface rgba(255, 255, 255, .62)
   --glass-border rgba(255, 255, 255, .82)
   --glass-sheen linear-gradient(135deg, rgba(255, 255, 255, .32), rgba(255, 255, 255, 0) 60%)
-  --ambient-rose rgba(226, 163, 199, .3)
-  --ambient-blue rgba(153, 201, 225, .32)
+  --nav-glass-surface rgba(255, 255, 255, .68)
+  --nav-glass-border rgba(255, 255, 255, .67)
+  --nav-highlight inset 0 1px 0 rgba(255, 255, 255, .75)
+  --nav-saturation 1.4
+  --card-glass-surface rgba(255, 255, 255, .92)
+  --card-border rgba(206, 120, 159, .12)
+  --card-highlight inset 0 1px 0 rgba(255, 255, 255, .7)
+  --card-shadow 0 4px 20px rgba(74, 52, 86, .045), 0 1px 3px rgba(74, 52, 86, .03)
+  --ambient-rose rgba(232, 155, 200, .22)
+  --ambient-blue rgba(142, 202, 232, .23)
   --glass-blur 22px
   --text-primary #343245
   --text-secondary #6d6274
@@ -59,15 +80,18 @@ dark-tokens()
   --accent-pink #ce789f
   --accent-pink-strong #a44c78
   --accent-cyan #77b2cc
-  --accent-tint #f9e6f0
+  --accent-tint #faeaf3
+  --accent-tint-strong #f6dce9
+  --accent-solid #ab4e7a
+  --accent-on-solid #fff
   --focus-ring #ce789f
   --shadow-soft 0 6px 24px rgba(105, 61, 104, .07), inset 0 1px 0 rgba(255, 255, 255, .8)
-  --shadow-card 0 10px 30px rgba(105, 61, 104, .09)
+  --shadow-card 0 10px 30px rgba(74, 52, 86, .095), 0 2px 6px rgba(74, 52, 86, .045)
   --radius-lg 1.4rem
-  --radius-md 1.2rem
+  --radius-md 1.125rem
   --content-width 86rem
   --sidebar-width 14.5rem
-  --utility-width 14rem
+  --utility-width 15.25rem
   --hero-overlay linear-gradient(90deg, transparent 30%, rgba(255, 248, 236, .32) 60%, rgba(255, 248, 236, .66))
   --hero-position center 39%
   --hero-text #5c4055

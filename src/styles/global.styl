@@ -10,13 +10,24 @@ html
 
 body
   min-width 20rem
-  min-height 100vh
   margin 0
   color var(--text-primary)
-  background radial-gradient(ellipse 55rem 35rem at 10% 34rem, var(--ambient-rose), transparent 75%), radial-gradient(ellipse 60rem 40rem at 95% 65rem, var(--ambient-blue), transparent 75%), var(--page-bg)
+  background radial-gradient(ellipse 55rem 35rem at 10% 55rem, var(--ambient-rose), transparent 75%), radial-gradient(ellipse 60rem 40rem at 95% 65rem, var(--ambient-blue), transparent 75%), var(--page-bg)
   font-family var(--font-site)
   font-weight 500
   line-height 1.7
+
+.site-shell
+  min-height 100dvh
+
+.site-shell, .literary-site
+  display flex
+  flex-direction column
+  > main
+    flex 1
+
+.literary-site
+  flex 1
 
 a
   color inherit
@@ -81,7 +92,7 @@ button, input, textarea, select, code, pre, kbd, samp
   min-height 3.75rem
   margin auto
   padding .35rem 1.25rem
-  border 1px solid var(--line-soft)
+  border 1px solid var(--nav-glass-border)
   border-radius 1.25rem
   background var(--surface-raised)
   box-shadow var(--shadow-soft)
@@ -124,6 +135,8 @@ button, input, textarea, select, code, pre, kbd, samp
     &:hover, &[aria-current='page']
       color var(--accent-blue-strong)
       background var(--accent-tint)
+    &[aria-current='page']
+      background var(--accent-tint-strong)
 
 .site-nav__theme
   position relative
@@ -157,6 +170,7 @@ button, input, textarea, select, code, pre, kbd, samp
       white-space nowrap
 
 .hero__subtitle
+  --bubble-start 100ms
   margin 1rem 0 0
   font-size 1rem
   text-shadow 0 1px 10px rgba(22, 25, 42, .18)
@@ -178,6 +192,12 @@ button, input, textarea, select, code, pre, kbd, samp
   color var(--page-bg)
   pointer-events none
 
+@media (min-width: 75.01rem)
+  .hero--home .hero__content
+    min-height clamp(28rem, 52vh, 33rem)
+  .hero--home .hero__edge
+    height 5.25rem
+
 .home-shell
   position relative
   z-index 2
@@ -185,6 +205,7 @@ button, input, textarea, select, code, pre, kbd, samp
   grid-template-columns var(--sidebar-width) minmax(0, 1fr) var(--utility-width)
   grid-template-areas 'sidebar content utility'
   align-items start
+  align-content start
   gap 1.25rem
   width calc(100% - 3rem)
   max-width var(--content-width)
@@ -210,11 +231,19 @@ button, input, textarea, select, code, pre, kbd, samp
 .utility-sidebar
   grid-area utility
 
-.side-card, .article-card, .page-panel
-  border 1px solid var(--line-soft)
+.home-shell--index > :is(.sidebar, .utility-sidebar)
+  align-self start
+  top 1.25rem
+
+@media (min-width: 75.01rem)
+  .home-shell--index > [data-sticky]
+    position sticky
+
+.side-card, .article-card, .page-panel, .section-heading, .quick-categories
+  border 1px solid var(--card-border)
   border-radius var(--radius-md)
   background var(--surface-raised)
-  box-shadow var(--shadow-soft)
+  box-shadow var(--card-shadow)
 
 .side-card
   min-width 0
@@ -226,20 +255,17 @@ button, input, textarea, select, code, pre, kbd, samp
     margin 0 0 .8rem
     font-size .95rem
     font-weight 700
-    [data-icon]
-      width 1.15rem
-      height 1.15rem
-      flex-shrink 0
-      color var(--accent-blue)
   p
     margin .3rem 0 0
     color var(--text-secondary)
     font-size .85rem
 
-.side-card__heading
-  display flex
-  justify-content space-between
-  align-items center
+.side-card:not(.profile-card) h2::before
+  content ''
+  flex 0 0 4px
+  height 1.1em
+  border-radius 999px
+  background var(--accent-pink)
 
 .side-card__eyebrow, .section-heading__eyebrow
   color var(--accent-blue-strong)
@@ -256,10 +282,6 @@ button, input, textarea, select, code, pre, kbd, samp
   gap .7rem
   margin 0 0 1rem
   padding .9rem 1.25rem
-  border-radius var(--radius-md)
-  background var(--surface-raised)
-  border 1px solid var(--line-soft)
-  box-shadow var(--shadow-soft)
   h2, h1
     position relative
     margin 0
@@ -331,11 +353,10 @@ button, input, textarea, select, code, pre, kbd, samp
 
 // Clip the glass layer independently so text, focus rings and menus stay sharp.
 @supports (backdrop-filter: blur(1px))
-  .site-nav, .side-card, .article-card, .page-panel, .section-heading
+  .site-nav, .side-card, .article-card, .page-panel, .section-heading, .quick-categories
     position relative
     isolation isolate
     background transparent
-    border-color var(--glass-border)
     &::before
       content ''
       position absolute
@@ -344,18 +365,36 @@ button, input, textarea, select, code, pre, kbd, samp
       pointer-events none
       border-radius inherit
       overflow hidden
-      background var(--glass-sheen), var(--glass-surface)
-      backdrop-filter blur(var(--glass-blur)) saturate(1.12)
+      background var(--glass-sheen), var(--card-glass-surface)
+      backdrop-filter blur(14px)
+      box-shadow var(--card-highlight)
 
-  .article-card:hover
-    border-color var(--accent-blue)
+  .site-nav::before
+    background var(--glass-sheen), var(--nav-glass-surface)
+    backdrop-filter blur(20px) saturate(var(--nav-saturation))
+    box-shadow var(--nav-highlight)
+
+@media (prefers-reduced-motion: no-preference)
+  .home-shell--index
+    .article-section:not([data-filtered]) .article-card, .side-card
+      animation home-card-in .45s ease-out backwards
+      animation-delay var(--card-enter-delay, 0ms)
+    :is(.article-card, .side-card):nth-child(2), .post-filters > .side-card:first-child
+      --card-enter-delay 55ms
+    :is(.article-card, .side-card):nth-child(3), .post-filters > .side-card:nth-child(2)
+      --card-enter-delay 110ms
+    :is(.article-card, .side-card):nth-child(n+4)
+      --card-enter-delay 165ms
+
+@keyframes home-card-in
+  from
+    opacity 0
+    translate 0 8px
+  to
+    opacity 1
+    translate 0 0
 
 @media (max-width: 75rem)
-  // Hang the clock beside the back link while leaving the reading column in place.
-  .hero--compact:has(+ .reading-shell)
-    z-index 3
-    .visitor-mount--compact
-      height 2rem
   .home-shell
     grid-template-columns 13.5rem minmax(0, 1fr)
     grid-template-areas 'sidebar content' 'utility content'
@@ -372,6 +411,10 @@ button, input, textarea, select, code, pre, kbd, samp
     --hero-position 40% 32%
     &::before
       top 6rem
+  .hero--home
+    --hero-position center 23%
+    &::before
+      background-image unquote('linear-gradient(to top, var(--page-bg), color-mix(in srgb, var(--page-bg) 92%, transparent) 22%, color-mix(in srgb, var(--page-bg) 74%, transparent) 37%, transparent 64%)'), var(--hero-bg)
   .site-nav
     grid-template-columns 1fr auto
     width calc(100% - 1.5rem)
@@ -402,10 +445,6 @@ button, input, textarea, select, code, pre, kbd, samp
     width 100%
     h1
       font-size 1.85rem
-    h1 .theme-light-only
-      font-size clamp(.8rem, 4.25vw, 1.15rem)
-      line-height 1.8
-      letter-spacing .02em
   .hero:not(.hero--home) .hero__content
     min-height 12rem
     padding 2rem 0 3rem
@@ -414,11 +453,19 @@ button, input, textarea, select, code, pre, kbd, samp
     margin-top .6rem
   .hero--home .hero__copy
     width 100%
-    padding .85rem 1rem
     color var(--text-primary)
+    h1
+      font-size clamp(1.45rem, 6vw, 1.95rem)
+    h1 .theme-light-only
+      font-size clamp(.9rem, 4.2vw, 1.3rem)
+      line-height 1.65
+    .hero__subtitle
+      margin-top .45rem
+      font-size .85rem
   .hero--home .hero__content
     width calc(100% - 2.5rem)
-    min-height 23rem
+    min-height clamp(18.5rem, 80vw, 22rem)
+    padding 1rem 0 2.8rem
   .hero__edge
     height 2rem
   .home-shell

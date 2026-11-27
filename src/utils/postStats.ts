@@ -1,5 +1,14 @@
 import type { CollectionEntry } from 'astro:content';
 
+export function estimateReadingMinutes(body = '') {
+  const prose = body
+    .replace(/^ {0,3}(`{3,}|~{3,})[^\n]*\n[\s\S]*?^ {0,3}\1[ \t]*\r?$/gm, '')
+    .replace(/!?\[([^\]]*)\]\([^\n)]*\)/g, '$1');
+  const han = prose.match(/\p{Script=Han}/gu)?.length ?? 0;
+  const words = prose.match(/[a-z]+(?:['’-][a-z]+)*/gi)?.length ?? 0;
+  return Math.max(1, Math.ceil(han / 450 + words / 220));
+}
+
 export interface TagGroup {
   total: number;
   tags: Map<string, number>;
